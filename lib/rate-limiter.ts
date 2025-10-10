@@ -12,8 +12,8 @@ class RedisRateLimiter {
   private readonly maxRequests: number
   private readonly windowMs: number
 
-  constructor(maxRequests = 4, windowMs = 24 * 60 * 60 * 1000) {
-    // Updated to 4 requests per day instead of 10 per minute
+  constructor(maxRequests = 100, windowMs = 60 * 60 * 1000) {
+    // Updated to 100 requests per hour for testing
     this.redis = new Redis({
       url: process.env.KV_REST_API_URL!,
       token: process.env.KV_REST_API_TOKEN!,
@@ -59,8 +59,8 @@ class RedisRateLimiter {
   }
 }
 
-// 4 requests per day per IP
-export const rateLimiter = new RedisRateLimiter(4, 24 * 60 * 60 * 1000) // Updated to 4 requests per 24 hours
+// 100 requests per hour per IP (testing - increase for production once settlement verified)
+export const rateLimiter = new RedisRateLimiter(100, 60 * 60 * 1000) // 100 requests per hour for testing
 
 // Helper function to get client IP
 export function getClientIP(request: Request): string {

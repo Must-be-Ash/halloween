@@ -168,10 +168,14 @@ export function CameraApp() {
         const extendedClient = walletClient.extend(publicActions)
 
         // Create wrapped fetch with payment handling
-        const fetchWithPayment = wrapFetchWithPayment(fetch, extendedClient)
+        const fetchWithPayment = wrapFetchWithPayment(
+          fetch,
+          extendedClient,
+          BigInt(0.1 * 10 ** 6) // Max payment: $0.10 USDC
+        )
 
         // Make request with x402 payment handling
-        const response = await fetchWithPayment("/api/process-image", {
+        const requestInit: RequestInit = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -180,7 +184,9 @@ export function CameraApp() {
             imageUrl: imageDataUrl,
             filter: selectedFilter.id,
           }),
-        })
+        }
+
+        const response = await fetchWithPayment("/api/process-image", requestInit)
 
         console.log("[v0] API response status:", response.status)
 

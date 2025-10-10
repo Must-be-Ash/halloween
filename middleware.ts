@@ -1,141 +1,218 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAddress } from "viem";
+
+const FACILITATOR_URL = "https://facilitator.x402.rs";
+const RECIPIENT_ADDRESS = process.env.RECIPIENT_WALLET_ADDRESS! as `0x${string}`;
+const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
 export async function middleware(request: NextRequest) {
-  // Only apply middleware to /api/process-image
-  if (!request.nextUrl.pathname.startsWith("/api/process-image")) {
-    return NextResponse.next();
-  }
+  console.log("[x402] ========== MIDDLEWARE INVOKED ==========");
+  console.log("[x402] Method:", request.method);
+  console.log("[x402] URL:", request.url);
+  console.log("[x402] Path:", request.nextUrl.pathname);
 
   const paymentHeader = request.headers.get("X-PAYMENT");
-  const recipientAddress = process.env.RECIPIENT_WALLET_ADDRESS;
-  const usdcContract = process.env.NEXT_PUBLIC_USDC_CONTRACT;
-
-  if (!recipientAddress) {
-    console.error("[x402] RECIPIENT_WALLET_ADDRESS not configured");
-    return NextResponse.json(
-      { error: "Payment system not configured" },
-      { status: 500 }
-    );
-  }
+  console.log("[x402] X-PAYMENT header present:", !!paymentHeader);
 
   // If no payment header, return 402 with payment requirements
   if (!paymentHeader) {
-    console.log("[x402] No payment header found, returning 402");
+    console.log("[x402] No payment header - returning 402");
 
-    return NextResponse.json(
-      {
-        x402Version: 1,
-        error: "Payment required",
-        accepts: [
-          {
-            scheme: "exact",
-            network: "base",
-            maxAmountRequired: "50000", // $0.05 USDC (6 decimals)
-            resource: `${request.nextUrl.protocol}//${request.nextUrl.host}${request.nextUrl.pathname}`,
-            description: "AI image transformation with Nano Banana - $0.05",
-            mimeType: "application/json",
-            payTo: getAddress(recipientAddress),
-            maxTimeoutSeconds: 60,
-            asset: getAddress(usdcContract || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
-            extra: {
-              name: "USD Coin",
-              version: "2",
-            },
+    const paymentRequirements = {
+      x402Version: 1,
+      error: "X-PAYMENT header is required",
+      accepts: [
+        {
+          scheme: "exact",
+          network: "base",
+          maxAmountRequired: (0.05 * 10 ** 6).toString(), // $0.05 USDC
+          resource: request.url,
+          description: "AI image transformation with Nano Banana - $0.05",
+          mimeType: "application/json",
+          payTo: RECIPIENT_ADDRESS,
+          maxTimeoutSeconds: 60,
+          asset: USDC_BASE,
+          extra: {
+            name: "USD Coin",
+            version: "2",
           },
-        ],
-      },
-      {
-        status: 402,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
         },
+      ],
+    };
+
+    return NextResponse.json(paymentRequirements, {
+      status: 402,
+      headers: {
+        "Content-Type": "application/json",
       }
+    });
+  }
+
+  // Decode payment header
+  console.log("[x402] Decoding payment header...");
+  let paymentPayload;
+  try {
+    const decoded = Buffer.from(paymentHeader, "base64").toString("utf-8");
+    paymentPayload = JSON.parse(decoded);
+    console.log("[x402] Payment payload decoded:", JSON.stringify(paymentPayload, null, 2));
+  } catch (error) {
+    console.error("[x402] Failed to decode payment:", error);
+    return NextResponse.json(
+      { error: "Invalid payment header format" },
+      { status: 400 }
     );
   }
 
-  // Payment header exists - verify it
+  // Verify payment with facilitator
+  console.log("[x402] Verifying payment with facilitator...");
+  const paymentRequirements = {
+    scheme: "exact",
+    network: "base",
+    maxAmountRequired: (0.05 * 10 ** 6).toString(),
+    resource: request.url,
+    description: "AI image transformation with Nano Banana - $0.05",
+    mimeType: "application/json",
+    payTo: RECIPIENT_ADDRESS,
+    maxTimeoutSeconds: 60,
+    asset: USDC_BASE,
+    extra: {
+      name: "USD Coin",
+      version: "2",
+    },
+  };
+
   try {
-    console.log("[x402] Payment header found, verifying...");
-
-    const { useFacilitator } = await import("x402/verify");
-    const { exact } = await import("x402/schemes");
-    
-    // Use x402.rs facilitator for reliable Base mainnet support
-    console.log("[x402] Using x402.rs facilitator for verification");
-    const { verify } = useFacilitator({ 
-      url: "https://facilitator.x402.rs" as `${string}://${string}`
-    });
-
-    // Decode payment using official x402 decoder
-    const decodedPayment = exact.evm.decodePayment(paymentHeader);
-    decodedPayment.x402Version = 1;
-
-    const paymentRequirements = {
-      scheme: "exact" as const,
-      network: "base" as const,
-      maxAmountRequired: "50000",
-      resource: `${request.nextUrl.protocol}//${request.nextUrl.host}${request.nextUrl.pathname}`,
-      description: "AI image transformation with Nano Banana - $0.05",
-      mimeType: "application/json",
-      payTo: getAddress(recipientAddress),
-      maxTimeoutSeconds: 60,
-      asset: getAddress(usdcContract || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
-      extra: {
-        name: "USD Coin",
-        version: "2",
-      },
+    const verifyRequestBody = {
+      x402Version: 1,
+      paymentPayload, // Send decoded object
+      paymentRequirements,
     };
 
-    // Verify payment
-    console.log("[x402] Calling verify...");
-    const verification = await verify(decodedPayment, paymentRequirements);
+    console.log("[x402] Sending verification request:", JSON.stringify(verifyRequestBody, null, 2));
 
-    if (!verification.isValid) {
-      console.error("[x402] Payment verification failed:", verification.invalidReason);
+    const verifyResponse = await fetch(`${FACILITATOR_URL}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(verifyRequestBody),
+    });
+
+    console.log("[x402] Verification response status:", verifyResponse.status);
+
+    // Log response text before trying to parse JSON
+    const responseText = await verifyResponse.text();
+    console.log("[x402] Verification response text:", responseText);
+
+    let verifyResult;
+    try {
+      verifyResult = JSON.parse(responseText);
+      console.log("[x402] Verification result:", JSON.stringify(verifyResult, null, 2));
+    } catch (parseError) {
+      console.error("[x402] Failed to parse verification response as JSON");
+      console.error("[x402] Response was:", responseText);
       return NextResponse.json(
-        {
-          x402Version: 1,
-          error: "Invalid payment",
-          reason: verification.invalidReason,
-          payer: verification.payer,
-          accepts: [paymentRequirements],
-        },
-        {
-          status: 402,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { error: "Facilitator returned invalid response", details: responseText },
+        { status: 500 }
       );
     }
 
-    console.log("[x402] Payment verified successfully, payer:", verification.payer);
-
-    // Payment is valid - allow request to proceed
-    // We'll settle the payment in the API route after successful processing
-    const response = NextResponse.next();
-    response.headers.set("X-PAYMENT-VERIFIED", "true");
-    if (verification.payer) {
-      response.headers.set("X-PAYER", verification.payer);
+    if (!verifyResult.isValid) {
+      console.error("[x402] Payment verification failed:", verifyResult.invalidReason);
+      return NextResponse.json(
+        { error: "Payment verification failed", reason: verifyResult.invalidReason },
+        { status: 402 }
+      );
     }
 
-    return response;
-
+    console.log("[x402] Payment verified successfully for payer:", verifyResult.payer);
   } catch (error) {
-    console.error("[x402] Error processing payment:", error);
+    console.error("[x402] Verification error:", error);
     return NextResponse.json(
-      {
-        error: "Payment verification error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "Payment verification failed" },
       { status: 500 }
     );
   }
+
+  // Process the request
+  console.log("[x402] Proceeding with request...");
+  const response = await NextResponse.next();
+
+  // Only settle if response was successful
+  if (response.status >= 400) {
+    console.log("[x402] Request failed (status:", response.status, ") - skipping settlement");
+    console.log("[x402] ========== MIDDLEWARE COMPLETE ==========");
+    return response;
+  }
+
+  console.log("[x402] Request successful (status:", response.status, ") - settling payment...");
+
+  // Settle payment synchronously (MUST complete before returning response)
+  const settleRequestBody = {
+    x402Version: 1,
+    paymentPayload, // Send decoded object
+    paymentRequirements,
+  };
+
+  try {
+    const settleResponse = await fetch(`${FACILITATOR_URL}/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settleRequestBody),
+    });
+
+    console.log("[x402] Settlement response status:", settleResponse.status);
+
+    const settleText = await settleResponse.text();
+    console.log("[x402] Settlement response text:", settleText);
+
+    let settleResult;
+    try {
+      settleResult = JSON.parse(settleText);
+      console.log("[x402] Settlement result:", JSON.stringify(settleResult, null, 2));
+    } catch (parseError) {
+      console.error("[x402] Failed to parse settlement response as JSON");
+      console.error("[x402] Response was:", settleText);
+      return NextResponse.json(
+        { error: "Settlement failed - invalid response from facilitator", details: settleText },
+        { status: 402 }
+      );
+    }
+
+    if (!settleResult.success) {
+      console.error("[x402] ❌ Settlement failed:", settleResult.errorReason || settleResult.error);
+      return NextResponse.json(
+        { error: "Payment settlement failed", reason: settleResult.errorReason || settleResult.error },
+        { status: 402 }
+      );
+    }
+
+    console.log("[x402] ✅ Payment settled successfully!");
+    console.log("[x402] Transaction:", settleResult.transaction || settleResult.txHash);
+    console.log("[x402] Network:", settleResult.network || settleResult.networkId);
+    console.log("[x402] Payer:", settleResult.payer);
+
+    // Add payment response header
+    const paymentResponse = {
+      success: true,
+      transaction: settleResult.transaction || settleResult.txHash,
+      network: settleResult.network || settleResult.networkId || "base",
+      payer: settleResult.payer || paymentPayload.payload?.authorization?.from,
+    };
+
+    response.headers.set(
+      "X-PAYMENT-RESPONSE",
+      Buffer.from(JSON.stringify(paymentResponse)).toString("base64")
+    );
+  } catch (error) {
+    console.error("[x402] Settlement error:", error);
+    return NextResponse.json(
+      { error: "Payment settlement failed", details: error instanceof Error ? error.message : String(error) },
+      { status: 402 }
+    );
+  }
+
+  console.log("[x402] ========== MIDDLEWARE COMPLETE ==========");
+  return response;
 }
 
 export const config = {
   matcher: "/api/process-image",
-  runtime: "nodejs",
 };

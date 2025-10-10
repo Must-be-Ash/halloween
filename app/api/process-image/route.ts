@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { fal } from "@fal-ai/client"
 import { rateLimiter, getClientIP } from "@/lib/rate-limiter"
-import { getAddress } from "viem"
 
 // Configure fal client
 fal.config({
@@ -119,7 +118,7 @@ export async function POST(request: NextRequest) {
         {
           status: 429,
           headers: {
-            "X-RateLimit-Limit": "10",
+            "X-RateLimit-Limit": "100",
             "X-RateLimit-Remaining": "0",
             "X-RateLimit-Reset": resetTime,
             "Retry-After": Math.ceil((rateLimitResult.resetTime! - Date.now()) / 1000).toString(),
@@ -160,73 +159,13 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Returning processed image without watermark")
 
-    // Settle payment after successful processing
-    const paymentHeader = request.headers.get("X-PAYMENT")
+    // Payment is already verified by middleware - no need to settle here
+    // The middleware verifies the cryptographic signature and USDC balance
+    // Settlement can be done later in batches if needed
     const headers: Record<string, string> = {
-      "X-RateLimit-Limit": "10",
+      "X-RateLimit-Limit": "100",
       "X-RateLimit-Remaining": rateLimitResult.remaining?.toString() || "0",
       "X-RateLimit-Reset": new Date(rateLimitResult.resetTime || 0).toISOString(),
-      "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
-    }
-
-    if (paymentHeader) {
-      try {
-        console.log("[x402] Settling payment...")
-        const { useFacilitator } = await import("x402/verify")
-        const { exact } = await import("x402/schemes")
-        
-        // Use x402.rs facilitator for settlement (matches verification)
-        console.log("[x402] Using x402.rs facilitator for settlement")
-        const { settle } = useFacilitator({ 
-          url: "https://facilitator.x402.rs" as `${string}://${string}`
-        })
-
-        // Decode payment using official x402 decoder
-        const decodedPayment = exact.evm.decodePayment(paymentHeader)
-        decodedPayment.x402Version = 1
-
-        const paymentRequirements = {
-          scheme: "exact" as const,
-          network: "base" as const,
-          maxAmountRequired: "50000",
-          resource: `${request.nextUrl.protocol}//${request.nextUrl.host}${request.nextUrl.pathname}`,
-          description: "AI image transformation with Nano Banana - $0.05",
-          mimeType: "application/json",
-          payTo: getAddress(process.env.RECIPIENT_WALLET_ADDRESS!),
-          maxTimeoutSeconds: 60,
-          asset: getAddress(process.env.NEXT_PUBLIC_USDC_CONTRACT || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
-          extra: {
-            name: "USD Coin",
-            version: "2",
-          },
-        }
-
-        // Add timeout to prevent hanging (30 seconds)
-        const settlementPromise = settle(decodedPayment, paymentRequirements)
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Settlement timeout after 30s')), 30000)
-        )
-        
-        const settlement = await Promise.race([settlementPromise, timeoutPromise]) as any
-
-        if (settlement.success) {
-          console.log("[x402] Payment settled successfully. Transaction:", settlement.transaction)
-          headers["X-PAYMENT-RESPONSE"] = Buffer.from(
-            JSON.stringify({
-              success: true,
-              transaction: settlement.transaction,
-              network: "base",
-              payer: settlement.payer,
-            })
-          ).toString("base64")
-        } else {
-          console.error("[x402] Payment settlement failed:", settlement.errorReason)
-        }
-      } catch (settlementError) {
-        const errorMsg = settlementError instanceof Error ? settlementError.message : 'Unknown error'
-        console.error("[x402] Error settling payment:", errorMsg)
-        // Don't fail the request if settlement fails - log for manual review
-      }
     }
 
     return NextResponse.json(
