@@ -174,8 +174,9 @@ export async function POST(request: NextRequest) {
         console.log("[x402] Settling payment...")
         const { useFacilitator } = await import("x402/verify")
         const { exact } = await import("x402/schemes")
+        // Use x402.rs facilitator - supports Base mainnet
         const facilitatorConfig = {
-          url: "https://x402.org/facilitator" as `${string}://${string}`
+          url: "https://facilitator.x402.rs" as `${string}://${string}`
         }
         const { settle } = useFacilitator(facilitatorConfig)
 
