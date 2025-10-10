@@ -453,3 +453,4 @@ This app demonstrates how to:
 ---
 
 **Built with x402 by [@EstebanSuarez](https://x.com/estebansuarez) | Learn more at [x402.org](https://www.x402.org/)**
+# thumbnail-maker
