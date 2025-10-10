@@ -11,15 +11,6 @@ export async function middleware(request: NextRequest) {
   const recipientAddress = process.env.RECIPIENT_WALLET_ADDRESS;
   const usdcContract = process.env.NEXT_PUBLIC_USDC_CONTRACT;
 
-  // Verify CDP credentials are configured
-  if (!process.env.CDP_API_KEY_ID || !process.env.CDP_API_KEY_SECRET) {
-    console.error("[x402] CDP_API_KEY_ID and CDP_API_KEY_SECRET must be set for mainnet");
-    return NextResponse.json(
-      { error: "Payment system not configured - missing CDP credentials" },
-      { status: 500 }
-    );
-  }
-
   if (!recipientAddress) {
     console.error("[x402] RECIPIENT_WALLET_ADDRESS not configured");
     return NextResponse.json(
@@ -67,14 +58,15 @@ export async function middleware(request: NextRequest) {
   // Payment header exists - verify it
   try {
     console.log("[x402] Payment header found, verifying...");
-    console.log("[x402] Using CDP facilitator (Base mainnet)");
+    console.log("[x402] Using x402.rs facilitator (Base mainnet - no auth required)");
 
     const { useFacilitator } = await import("x402/verify");
     const { exact } = await import("x402/schemes");
-    const { facilitator } = await import("@coinbase/x402");
     
-    // Initialize CDP facilitator for Base mainnet
-    const { verify } = useFacilitator(facilitator);
+    // Use x402.rs facilitator - supports Base mainnet, no API keys required!
+    const { verify } = useFacilitator({ 
+      url: "https://facilitator.x402.rs" as `${string}://${string}`
+    });
 
     // Decode payment using official x402 decoder
     const decodedPayment = exact.evm.decodePayment(paymentHeader);
