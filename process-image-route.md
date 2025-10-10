@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { fal } from "@fal-ai/client"
 import { rateLimiter, getClientIP } from "@/lib/rate-limiter"
-import { getAddress } from "viem"
 
 // Configure fal client
 fal.config({
@@ -134,6 +133,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Image URL and filter are required" }, { status: 400 })
     }
 
+    if (filter === "space") {
+      return NextResponse.json(
+        { processedImageUrl: imageUrl },
+        {
+          headers: {
+            "X-RateLimit-Limit": "10",
+            "X-RateLimit-Remaining": rateLimitResult.remaining?.toString() || "0",
+            "X-RateLimit-Reset": new Date(rateLimitResult.resetTime || 0).toISOString(),
+          },
+        },
+      )
+    }
+
     const config = filterConfigs[filter as keyof typeof filterConfigs]
     if (!config) {
       return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
@@ -160,71 +172,17 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Returning processed image without watermark")
 
-    // Settle payment after successful processing
-    const paymentHeader = request.headers.get("X-PAYMENT")
-    const headers: Record<string, string> = {
-      "X-RateLimit-Limit": "10",
-      "X-RateLimit-Remaining": rateLimitResult.remaining?.toString() || "0",
-      "X-RateLimit-Reset": new Date(rateLimitResult.resetTime || 0).toISOString(),
-      "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
-    }
-
-    if (paymentHeader) {
-      try {
-        console.log("[x402] Settling payment...")
-        const { useFacilitator } = await import("x402/verify")
-        const { exact } = await import("x402/schemes")
-        const facilitatorConfig = {
-          url: "https://x402.org/facilitator" as `${string}://${string}`
-        }
-        const { settle } = useFacilitator(facilitatorConfig)
-
-        // Decode payment using official x402 decoder
-        const decodedPayment = exact.evm.decodePayment(paymentHeader)
-        decodedPayment.x402Version = 1
-
-        const paymentRequirements = {
-          scheme: "exact" as const,
-          network: "base" as const,
-          maxAmountRequired: "50000",
-          resource: `${request.nextUrl.protocol}//${request.nextUrl.host}${request.nextUrl.pathname}`,
-          description: "AI image transformation with Nano Banana - $0.05",
-          mimeType: "application/json",
-          payTo: getAddress(process.env.RECIPIENT_WALLET_ADDRESS!),
-          maxTimeoutSeconds: 60,
-          asset: getAddress(process.env.NEXT_PUBLIC_USDC_CONTRACT || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
-          extra: {
-            name: "USD Coin",
-            version: "2",
-          },
-        }
-
-        const settlement = await settle(decodedPayment, paymentRequirements)
-
-        if (settlement.success) {
-          console.log("[x402] Payment settled successfully. Transaction:", settlement.transaction)
-          headers["X-PAYMENT-RESPONSE"] = Buffer.from(
-            JSON.stringify({
-              success: true,
-              transaction: settlement.transaction,
-              network: "base",
-              payer: settlement.payer,
-            })
-          ).toString("base64")
-        } else {
-          console.error("[x402] Payment settlement failed:", settlement.errorReason)
-        }
-      } catch (settlementError) {
-        console.error("[x402] Error settling payment:", settlementError)
-        // Don't fail the request if settlement fails - log for manual review
-      }
-    }
-
     return NextResponse.json(
       {
         processedImageUrl: processedImageUrl,
       },
-      { headers }
+      {
+        headers: {
+          "X-RateLimit-Limit": "10",
+          "X-RateLimit-Remaining": rateLimitResult.remaining?.toString() || "0",
+          "X-RateLimit-Reset": new Date(rateLimitResult.resetTime || 0).toISOString(),
+        },
+      },
     )
   } catch (error) {
     console.error("[v0] Error with Nano Banana processing:", error)

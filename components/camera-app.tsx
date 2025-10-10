@@ -1,11 +1,12 @@
 "use client"
 import { useState, useCallback } from "react"
+import { useAccount, useWalletClient } from "wagmi"
 import { CameraCapture } from "./camera-capture"
 import { ProcessedImage } from "./processed-image"
 import { addWatermark } from "../lib/watermark"
 
 export type FilterType =
-  | "none"
+  | "space"
   | "acid"
   | "vintage"
   | "cyberpunk"
@@ -38,10 +39,11 @@ export interface Filter {
 
 const filters: Filter[] = [
   {
-    id: "none",
-    name: "Original",
-    description: "No filter",
-    prompt: "",
+    id: "space",
+    name: "Space",
+    description: "Cosmic adventure",
+    prompt:
+      "Transform people into space explorers: astronauts in white space suits with helmets, futuristic space gear, LED lights on suits, oxygen tanks, space boots, mission patches, high-tech visors. Add space environment: distant planets, colorful nebulas, asteroid fields, space stations, rocket ships, alien landscapes, cosmic dust, star fields, solar flares, space debris, zero gravity effects. Apply cosmic lighting with deep space blues, purples, and stellar whites with ethereal glow effects.",
   },
   {
     id: "art_deco",
@@ -136,6 +138,10 @@ export function CameraApp() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [capturedWithFrontCamera, setCapturedWithFrontCamera] = useState(false)
 
+  // Wagmi hooks for wallet connectivity
+  const { address, isConnected } = useAccount()
+  const { data: walletClient } = useWalletClient()
+
   const selectedFilter = filters[selectedFilterIndex]
 
   const handleCapture = useCallback(
@@ -144,22 +150,28 @@ export function CameraApp() {
       setProcessedImage(null)
       setCapturedWithFrontCamera(facingMode === "user")
 
-      if (selectedFilter.id === "none") {
-        try {
-          const watermarkedImage = await addWatermark(imageDataUrl, facingMode === "user")
-          setProcessedImage(watermarkedImage)
-        } catch (error) {
-          console.error("[v0] Error adding watermark to original image:", error)
-          setProcessedImage(imageDataUrl)
-        }
-        return
-      }
-
       setIsProcessing(true)
 
       try {
         console.log("[v0] Starting image processing with filter:", selectedFilter.id)
-        const response = await fetch("/api/process-image", {
+
+        // Check if wallet is connected
+        if (!isConnected || !walletClient) {
+          throw new Error("Please connect your wallet to process images")
+        }
+
+        // Import x402-fetch and viem publicActions
+        const { wrapFetchWithPayment } = await import("x402-fetch")
+        const { publicActions } = await import("viem")
+
+        // Extend wallet client with public actions (required by x402-fetch)
+        const extendedClient = walletClient.extend(publicActions)
+
+        // Create wrapped fetch with payment handling
+        const fetchWithPayment = wrapFetchWithPayment(fetch, extendedClient)
+
+        // Make request with x402 payment handling
+        const response = await fetchWithPayment("/api/process-image", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -238,7 +250,7 @@ export function CameraApp() {
         setIsProcessing(false)
       }
     },
-    [selectedFilter],
+    [selectedFilter, isConnected, walletClient],
   )
 
   const handleReset = () => {
@@ -303,6 +315,8 @@ export function CameraApp() {
           onFilterSelect={handleFilterSelect}
           filterIndex={selectedFilterIndex}
           filters={filters}
+          isWalletConnected={isConnected}
+          walletAddress={address}
         />
       ) : (
         <ProcessedImage

@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useCallback, useEffect } from "react"
+import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { LiquidGlass } from "./liquid-glass"
 import type { Filter } from "./camera-app"
 
@@ -46,9 +47,19 @@ interface CameraCaptureProps {
   onFilterSelect: (index: number) => void
   filterIndex: number
   filters: Filter[]
+  isWalletConnected: boolean
+  walletAddress?: `0x${string}`
 }
 
-export function CameraCapture({ onCapture, selectedFilter, onFilterSelect, filterIndex, filters }: CameraCaptureProps) {
+export function CameraCapture({
+  onCapture,
+  selectedFilter,
+  onFilterSelect,
+  filterIndex,
+  filters,
+  isWalletConnected,
+  walletAddress
+}: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -58,30 +69,7 @@ export function CameraCapture({ onCapture, selectedFilter, onFilterSelect, filte
   const [error, setError] = useState<string | null>(null)
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user")
   const [isDesktop, setIsDesktop] = useState(false)
-  const [showSwipeHint, setShowSwipeHint] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const hasEverTakenPhoto = localStorage.getItem("banana-camera-photo-taken")
-        const hasEverTakenPhotoAlt = localStorage.getItem("banana_camera_photo_taken") // Alternative key
-        const sessionFlag = sessionStorage.getItem("banana-camera-photo-taken")
-
-        console.log("[v0] Initializing showSwipeHint - localStorage value:", hasEverTakenPhoto)
-        console.log("[v0] Initializing showSwipeHint - alternative key:", hasEverTakenPhotoAlt)
-        console.log("[v0] Initializing showSwipeHint - sessionStorage value:", sessionFlag)
-        console.log("[v0] Initializing showSwipeHint - all localStorage keys:", Object.keys(localStorage))
-
-        // Check if any of the storage methods indicate a photo was taken
-        const photoWasTaken = hasEverTakenPhoto === "true" || hasEverTakenPhotoAlt === "true" || sessionFlag === "true"
-        console.log("[v0] Photo was taken before:", photoWasTaken)
-
-        return !photoWasTaken
-      } catch (error) {
-        console.log("[v0] Error reading localStorage:", error)
-        return true // Default to showing hint if there's an error
-      }
-    }
-    return true
-  })
+  const [showSwipeHint, setShowSwipeHint] = useState(true) // Default to showing hint
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const lastScrollTime = useRef(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -660,6 +648,26 @@ export function CameraCapture({ onCapture, selectedFilter, onFilterSelect, filte
     console.log("[v0] showSwipeHint state changed to:", showSwipeHint)
   }, [showSwipeHint])
 
+  // Check localStorage for photo taken status (client-side only to avoid hydration errors)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const hasEverTakenPhoto = localStorage.getItem("banana-camera-photo-taken")
+        const hasEverTakenPhotoAlt = localStorage.getItem("banana_camera_photo_taken")
+        const sessionFlag = sessionStorage.getItem("banana-camera-photo-taken")
+
+        const photoWasTaken = hasEverTakenPhoto === "true" || hasEverTakenPhotoAlt === "true" || sessionFlag === "true"
+
+        if (photoWasTaken) {
+          console.log("[v0] Photo was taken before, hiding swipe hint")
+          setShowSwipeHint(false)
+        }
+      } catch (error) {
+        console.log("[v0] Error reading localStorage:", error)
+      }
+    }
+  }, [])
+
   if (error) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-black text-white">
@@ -725,6 +733,18 @@ export function CameraCapture({ onCapture, selectedFilter, onFilterSelect, filte
           </div>
 
           <div className="flex items-center space-x-2 ml-auto">
+            {/* Wallet Connect Button */}
+            <div className="mr-2">
+              <ConnectButton
+                chainStatus="none"
+                showBalance={false}
+                accountStatus={{
+                  smallScreen: "avatar",
+                  largeScreen: "full"
+                }}
+              />
+            </div>
+
             <LiquidGlass
               variant="button"
               intensity="medium"
