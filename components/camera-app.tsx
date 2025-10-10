@@ -6,7 +6,6 @@ import { ProcessedImage } from "./processed-image"
 import { addWatermark } from "../lib/watermark"
 
 export type FilterType =
-  | "space"
   | "acid"
   | "vintage"
   | "cyberpunk"
@@ -38,13 +37,6 @@ export interface Filter {
 }
 
 const filters: Filter[] = [
-  {
-    id: "space",
-    name: "Space",
-    description: "Cosmic adventure",
-    prompt:
-      "Transform people into space explorers: astronauts in white space suits with helmets, futuristic space gear, LED lights on suits, oxygen tanks, space boots, mission patches, high-tech visors. Add space environment: distant planets, colorful nebulas, asteroid fields, space stations, rocket ships, alien landscapes, cosmic dust, star fields, solar flares, space debris, zero gravity effects. Apply cosmic lighting with deep space blues, purples, and stellar whites with ethereal glow effects.",
-  },
   {
     id: "art_deco",
     name: "Art Deco",

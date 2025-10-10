@@ -63,19 +63,13 @@ export function ProcessedImage({
         )}
 
         {isProcessing && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-            <div className="text-center space-y-6">
-              <div className="w-64 h-1 bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white rounded-full"
-                  style={{
-                    animation: "shimmer 2s ease-in-out infinite",
-                    background: "linear-gradient(90deg, transparent, white, transparent)",
-                    backgroundSize: "200% 100%",
-                  }}
-                />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="text-center space-y-4">
+              {/* Simple spinning loader */}
+              <div className="w-16 h-16 mx-auto">
+                <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
               </div>
-              <p className="text-white/80 font-medium">Processing with {filterName}...</p>
+              <p className="text-white font-medium text-lg">Processing with {filterName}...</p>
             </div>
           </div>
         )}

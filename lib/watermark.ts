@@ -36,7 +36,7 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       // Draw the original image without any transformations
       ctx.drawImage(img, 0, 0)
 
-      const watermarkText = "Created with v0.app's BananaCam"
+      const watermarkText = "Created with v0, Fal, Nano Banana, and x402"
 
       const minFontSize = 80
       const widthBasedSize = img.width / 2.5
