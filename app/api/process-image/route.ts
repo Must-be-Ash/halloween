@@ -189,7 +189,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. Continue with rate limiting and image processing
+    // 3. Settle payment BEFORE processing image (collect money first!)
+    console.log("[x402] Settling payment...")
+    let settlementResult
+    try {
+      settlementResult = await settlePayment(paymentPayload, paymentRequirements)
+      console.log("[x402] Settlement result:", JSON.stringify(settlementResult, null, 2))
+
+      if (!settlementResult.success) {
+        console.error("[x402] ❌ Settlement failed:", settlementResult.errorReason)
+        return NextResponse.json(
+          { error: "Payment settlement failed", reason: settlementResult.errorReason },
+          { status: 402 }
+        )
+      }
+
+      console.log("[x402] ✅ Payment settled successfully!")
+      console.log("[x402] Transaction:", settlementResult.transaction)
+      console.log("[x402] Network:", settlementResult.network)
+      console.log("[x402] Payer:", settlementResult.payer)
+    } catch (error) {
+      console.error("[x402] Settlement error:", error)
+      return NextResponse.json(
+        { error: "Payment settlement failed", details: error instanceof Error ? error.message : String(error) },
+        { status: 402 }
+      )
+    }
+
+    // 4. Continue with rate limiting and image processing
     const clientIP = getClientIP(request)
     const rateLimitResult = await rateLimiter.isAllowed(clientIP)
 
@@ -245,34 +272,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Returning processed image without watermark")
 
-    // 4. Settle payment after successful processing
-    console.log("[x402] Settling payment...")
-    let settlementResult
-    try {
-      settlementResult = await settlePayment(paymentPayload, paymentRequirements)
-      console.log("[x402] Settlement result:", JSON.stringify(settlementResult, null, 2))
-
-      if (!settlementResult.success) {
-        console.error("[x402] ❌ Settlement failed:", settlementResult.errorReason)
-        return NextResponse.json(
-          { error: "Payment settlement failed", reason: settlementResult.errorReason },
-          { status: 402 }
-        )
-      }
-
-      console.log("[x402] ✅ Payment settled successfully!")
-      console.log("[x402] Transaction:", settlementResult.transaction)
-      console.log("[x402] Network:", settlementResult.network)
-      console.log("[x402] Payer:", settlementResult.payer)
-    } catch (error) {
-      console.error("[x402] Settlement error:", error)
-      return NextResponse.json(
-        { error: "Payment settlement failed", details: error instanceof Error ? error.message : String(error) },
-        { status: 402 }
-      )
-    }
-
-    // 5. Add payment receipt to response headers
+    // 5. Add payment receipt to response headers (payment already settled before processing)
     const headers: Record<string, string> = {
       "X-RateLimit-Limit": "100",
       "X-RateLimit-Remaining": rateLimitResult.remaining?.toString() || "0",
