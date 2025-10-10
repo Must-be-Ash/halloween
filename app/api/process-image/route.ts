@@ -174,10 +174,12 @@ export async function POST(request: NextRequest) {
         console.log("[x402] Settling payment...")
         const { useFacilitator } = await import("x402/verify")
         const { exact } = await import("x402/schemes")
-        const { facilitator } = await import("@coinbase/x402")
         
-        // Use CDP facilitator for reliable Base mainnet support
-        const { settle } = useFacilitator(facilitator)
+        // Use x402.rs facilitator for settlement (matches verification)
+        console.log("[x402] Using x402.rs facilitator for settlement")
+        const { settle } = useFacilitator({ 
+          url: "https://facilitator.x402.rs" as `${string}://${string}`
+        })
 
         // Decode payment using official x402 decoder
         const decodedPayment = exact.evm.decodePayment(paymentHeader)
