@@ -58,15 +58,14 @@ export async function middleware(request: NextRequest) {
   // Payment header exists - verify it
   try {
     console.log("[x402] Payment header found, verifying...");
-    console.log("[x402] Using x402.rs facilitator (Base mainnet - no auth required)");
+    console.log("[x402] Using CDP facilitator (Base mainnet)");
 
     const { useFacilitator } = await import("x402/verify");
     const { exact } = await import("x402/schemes");
+    const { facilitator } = await import("@coinbase/x402");
     
-    // Use x402.rs facilitator - supports Base mainnet, no API keys required!
-    const { verify } = useFacilitator({ 
-      url: "https://facilitator.x402.rs" as `${string}://${string}`
-    });
+    // Use CDP facilitator for reliable Base mainnet support
+    const { verify } = useFacilitator(facilitator);
 
     // Decode payment using official x402 decoder
     const decodedPayment = exact.evm.decodePayment(paymentHeader);

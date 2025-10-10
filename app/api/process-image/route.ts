@@ -174,11 +174,10 @@ export async function POST(request: NextRequest) {
         console.log("[x402] Settling payment...")
         const { useFacilitator } = await import("x402/verify")
         const { exact } = await import("x402/schemes")
-        // Use x402.rs facilitator - supports Base mainnet
-        const facilitatorConfig = {
-          url: "https://facilitator.x402.rs" as `${string}://${string}`
-        }
-        const { settle } = useFacilitator(facilitatorConfig)
+        const { facilitator } = await import("@coinbase/x402")
+        
+        // Use CDP facilitator for reliable Base mainnet support
+        const { settle } = useFacilitator(facilitator)
 
         // Decode payment using official x402 decoder
         const decodedPayment = exact.evm.decodePayment(paymentHeader)
@@ -200,7 +199,13 @@ export async function POST(request: NextRequest) {
           },
         }
 
-        const settlement = await settle(decodedPayment, paymentRequirements)
+        // Add timeout to prevent hanging (30 seconds)
+        const settlementPromise = settle(decodedPayment, paymentRequirements)
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Settlement timeout after 30s')), 30000)
+        )
+        
+        const settlement = await Promise.race([settlementPromise, timeoutPromise]) as any
 
         if (settlement.success) {
           console.log("[x402] Payment settled successfully. Transaction:", settlement.transaction)
@@ -216,7 +221,8 @@ export async function POST(request: NextRequest) {
           console.error("[x402] Payment settlement failed:", settlement.errorReason)
         }
       } catch (settlementError) {
-        console.error("[x402] Error settling payment:", settlementError)
+        const errorMsg = settlementError instanceof Error ? settlementError.message : 'Unknown error'
+        console.error("[x402] Error settling payment:", errorMsg)
         // Don't fail the request if settlement fails - log for manual review
       }
     }
