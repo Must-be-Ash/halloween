@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { facilitator } from "@coinbase/x402";
+import { useFacilitator } from "x402/verify";
 
-const FACILITATOR_URL = "https://facilitator.x402.rs";
 const RECIPIENT_ADDRESS = process.env.RECIPIENT_WALLET_ADDRESS! as `0x${string}`;
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+
+// Initialize facilitator client with CDP authentication
+const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilitator);
 
 export async function middleware(request: NextRequest) {
   console.log("[x402] ========== MIDDLEWARE INVOKED ==========");
@@ -62,11 +66,11 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // Verify payment with facilitator
-  console.log("[x402] Verifying payment with facilitator...");
+  // Verify payment with CDP facilitator
+  console.log("[x402] Verifying payment with CDP facilitator...");
   const paymentRequirements = {
-    scheme: "exact",
-    network: "base",
+    scheme: "exact" as const,
+    network: "base" as const,
     maxAmountRequired: (0.05 * 10 ** 6).toString(),
     resource: request.url,
     description: "AI image transformation with Nano Banana - $0.05",
@@ -81,38 +85,12 @@ export async function middleware(request: NextRequest) {
   };
 
   try {
-    const verifyRequestBody = {
-      x402Version: 1,
-      paymentPayload, // Send decoded object
-      paymentRequirements,
-    };
+    console.log("[x402] Calling verifyPayment with payload:", JSON.stringify(paymentPayload, null, 2));
+    console.log("[x402] Payment requirements:", JSON.stringify(paymentRequirements, null, 2));
 
-    console.log("[x402] Sending verification request:", JSON.stringify(verifyRequestBody, null, 2));
+    const verifyResult = await verifyPayment(paymentPayload, paymentRequirements);
 
-    const verifyResponse = await fetch(`${FACILITATOR_URL}/verify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(verifyRequestBody),
-    });
-
-    console.log("[x402] Verification response status:", verifyResponse.status);
-
-    // Log response text before trying to parse JSON
-    const responseText = await verifyResponse.text();
-    console.log("[x402] Verification response text:", responseText);
-
-    let verifyResult;
-    try {
-      verifyResult = JSON.parse(responseText);
-      console.log("[x402] Verification result:", JSON.stringify(verifyResult, null, 2));
-    } catch (parseError) {
-      console.error("[x402] Failed to parse verification response as JSON");
-      console.error("[x402] Response was:", responseText);
-      return NextResponse.json(
-        { error: "Facilitator returned invalid response", details: responseText },
-        { status: 500 }
-      );
-    }
+    console.log("[x402] Verification result:", JSON.stringify(verifyResult, null, 2));
 
     if (!verifyResult.isValid) {
       console.error("[x402] Payment verification failed:", verifyResult.invalidReason);
@@ -126,7 +104,7 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error("[x402] Verification error:", error);
     return NextResponse.json(
-      { error: "Payment verification failed" },
+      { error: "Payment verification failed", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
@@ -144,57 +122,33 @@ export async function middleware(request: NextRequest) {
 
   console.log("[x402] Request successful (status:", response.status, ") - settling payment...");
 
-  // Settle payment synchronously (MUST complete before returning response)
-  const settleRequestBody = {
-    x402Version: 1,
-    paymentPayload, // Send decoded object
-    paymentRequirements,
-  };
-
+  // Settle payment with CDP facilitator (MUST complete before returning response)
   try {
-    const settleResponse = await fetch(`${FACILITATOR_URL}/settle`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settleRequestBody),
-    });
+    console.log("[x402] Calling settlePayment...");
 
-    console.log("[x402] Settlement response status:", settleResponse.status);
+    const settleResult = await settlePayment(paymentPayload, paymentRequirements);
 
-    const settleText = await settleResponse.text();
-    console.log("[x402] Settlement response text:", settleText);
-
-    let settleResult;
-    try {
-      settleResult = JSON.parse(settleText);
-      console.log("[x402] Settlement result:", JSON.stringify(settleResult, null, 2));
-    } catch (parseError) {
-      console.error("[x402] Failed to parse settlement response as JSON");
-      console.error("[x402] Response was:", settleText);
-      return NextResponse.json(
-        { error: "Settlement failed - invalid response from facilitator", details: settleText },
-        { status: 402 }
-      );
-    }
+    console.log("[x402] Settlement result:", JSON.stringify(settleResult, null, 2));
 
     if (!settleResult.success) {
-      console.error("[x402] ❌ Settlement failed:", settleResult.errorReason || settleResult.error);
+      console.error("[x402] ❌ Settlement failed:", settleResult.errorReason);
       return NextResponse.json(
-        { error: "Payment settlement failed", reason: settleResult.errorReason || settleResult.error },
+        { error: "Payment settlement failed", reason: settleResult.errorReason },
         { status: 402 }
       );
     }
 
     console.log("[x402] ✅ Payment settled successfully!");
-    console.log("[x402] Transaction:", settleResult.transaction || settleResult.txHash);
-    console.log("[x402] Network:", settleResult.network || settleResult.networkId);
+    console.log("[x402] Transaction:", settleResult.transaction);
+    console.log("[x402] Network:", settleResult.network);
     console.log("[x402] Payer:", settleResult.payer);
 
     // Add payment response header
     const paymentResponse = {
       success: true,
-      transaction: settleResult.transaction || settleResult.txHash,
-      network: settleResult.network || settleResult.networkId || "base",
-      payer: settleResult.payer || paymentPayload.payload?.authorization?.from,
+      transaction: settleResult.transaction,
+      network: settleResult.network,
+      payer: settleResult.payer,
     };
 
     response.headers.set(
