@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { facilitator } from "@coinbase/x402";
-import { useFacilitator } from "x402/verify";
 
-const RECIPIENT_ADDRESS = process.env.RECIPIENT_WALLET_ADDRESS! as `0x${string}`;
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
-// Initialize facilitator client with CDP authentication
-const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilitator);
-
 export async function middleware(request: NextRequest) {
+  // Initialize facilitator at REQUEST TIME (not module load time)
+  // This ensures env vars are available and JWT tokens are fresh
+  const { facilitator } = await import("@coinbase/x402");
+  const { useFacilitator } = await import("x402/verify");
+  const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilitator);
+
+  const RECIPIENT_ADDRESS = process.env.RECIPIENT_WALLET_ADDRESS! as `0x${string}`;
   console.log("[x402] ========== MIDDLEWARE INVOKED ==========");
   console.log("[x402] Method:", request.method);
   console.log("[x402] URL:", request.url);
