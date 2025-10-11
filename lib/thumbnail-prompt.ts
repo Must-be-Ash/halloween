@@ -51,3 +51,38 @@ EXECUTION INSTRUCTIONS:
 
 CRITICAL: The person's FACE and FACIAL IDENTITY must remain exactly recognizable. Transform everything else (clothing, hair styling, environment, lighting, props) to create a complete cinematic makeover. No cartoon or digital art effects - only photorealistic transformations.`;
 }
+
+/**
+ * Combines a filter aesthetic with custom user content
+ *
+ * This allows users to specify WHAT they want (custom content)
+ * while applying HOW it should look (filter aesthetic)
+ *
+ * @param userDescription - User's custom thumbnail content/theme
+ * @param filterPrompt - Optional filter aesthetic to apply
+ * @returns Combined prompt that merges both elements
+ */
+export function createCombinedPrompt(
+  userDescription: string,
+  filterPrompt?: string
+): string {
+  if (!filterPrompt || filterPrompt.trim() === "") {
+    // No filter selected: use enhanced custom prompt only
+    return createThumbnailPrompt(userDescription);
+  }
+
+  // Combine filter aesthetic with custom content
+  return `${filterPrompt}
+
+ADDITIONAL USER REQUIREMENTS TO SEAMLESSLY INTEGRATE:
+${userDescription}
+
+INTEGRATION INSTRUCTIONS:
+- Maintain ALL the aesthetic, styling, and environmental transformations described above
+- Seamlessly integrate the user's specific content requirements into this established world
+- The user's requirements should enhance and complement the theme, not replace it
+- Ensure the final result feels cohesive - as if the user's content naturally belongs in this aesthetic universe
+- Continue to maintain exact facial features and identity while transforming everything else
+
+CRITICAL: Preserve the person's face and facial identity. Apply the complete cinematic transformation as specified while naturally incorporating the user's custom elements.`;
+}

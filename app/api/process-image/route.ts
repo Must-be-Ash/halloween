@@ -3,7 +3,7 @@ import { fal } from "@fal-ai/client"
 import { rateLimiter, getClientIP } from "@/lib/rate-limiter"
 import { facilitator } from "@coinbase/x402"
 import { useFacilitator } from "x402/verify"
-import { createThumbnailPrompt } from "@/lib/thumbnail-prompt"
+import { createThumbnailPrompt, createCombinedPrompt } from "@/lib/thumbnail-prompt"
 
 // Configure fal client
 fal.config({
@@ -243,23 +243,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Image URL is required" }, { status: 400 })
     }
 
-    // Determine which prompt to use: custom or filter template
+    // Determine which prompt to use based on combination of inputs
     let finalPrompt: string
 
-    if (customPrompt) {
-      // User provided custom thumbnail description
+    if (customPrompt && filter && filter !== "none") {
+      // Both custom prompt AND filter: combine them
+      const config = filterConfigs[filter as keyof typeof filterConfigs]
+      if (!config) {
+        return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
+      }
+      finalPrompt = createCombinedPrompt(customPrompt, config.prompt)
+      console.log("[thumbnail-maker] Processing with combined prompt + filter:", filter)
+      console.log("[thumbnail-maker] Custom content:", customPrompt.substring(0, 80) + "...")
+    } else if (customPrompt) {
+      // Custom prompt only (no filter or filter is "none")
       finalPrompt = createThumbnailPrompt(customPrompt)
-      console.log("[thumbnail-maker] Processing with custom prompt:", customPrompt.substring(0, 100) + "...")
-    } else if (filter) {
-      // Using existing filter template
+      console.log("[thumbnail-maker] Processing with custom prompt only:", customPrompt.substring(0, 100) + "...")
+    } else if (filter && filter !== "none") {
+      // Filter only (backward compatible - no custom prompt)
       const config = filterConfigs[filter as keyof typeof filterConfigs]
       if (!config) {
         return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
       }
       finalPrompt = config.prompt
-      console.log("[thumbnail-maker] Processing image with filter:", filter)
+      console.log("[thumbnail-maker] Processing with filter only:", filter)
     } else {
-      return NextResponse.json({ error: "Either filter or customPrompt is required" }, { status: 400 })
+      return NextResponse.json({ error: "Either customPrompt or filter is required" }, { status: 400 })
     }
 
     console.log("[thumbnail-maker] Using transformation prompt")

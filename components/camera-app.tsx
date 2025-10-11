@@ -10,6 +10,7 @@ import { createWalletClient, http, publicActions } from "viem"
 import { base } from "viem/chains"
 
 export type FilterType =
+  | "none"
   | "acid"
   | "vintage"
   | "cyberpunk"
@@ -41,6 +42,12 @@ export interface Filter {
 }
 
 const filters: Filter[] = [
+  {
+    id: "none",
+    name: "No Filter",
+    description: "Pure custom",
+    prompt: "",
+  },
   {
     id: "art_deco",
     name: "Art Deco",
@@ -134,7 +141,6 @@ export function CameraApp() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [capturedWithFrontCamera, setCapturedWithFrontCamera] = useState(false)
   const [customPrompt, setCustomPrompt] = useState<string>("")
-  const [useCustomPrompt, setUseCustomPrompt] = useState(false)
 
   // Wagmi hooks - now detect BOTH CDP and external wallets
   const { address, isConnected, connector } = useAccount()
@@ -159,14 +165,22 @@ export function CameraApp() {
       setIsProcessing(true)
 
       try {
-        // Check if using custom prompt or filter template
-        if (useCustomPrompt) {
-          if (!customPrompt.trim()) {
-            throw new Error("Please enter a description for your thumbnail")
-          }
-          console.log("[thumbnail-maker] Starting image processing with custom prompt:", customPrompt.substring(0, 50) + "...")
+        // Validate: need either custom prompt OR a filter (not "none")
+        const hasCustomPrompt = customPrompt.trim().length > 0
+        const hasFilter = selectedFilter.id !== "none"
+
+        if (!hasCustomPrompt && !hasFilter) {
+          throw new Error("Please enter a custom prompt or select a filter")
+        }
+
+        // Log what we're processing
+        if (hasCustomPrompt && !hasFilter) {
+          console.log("[thumbnail-maker] Processing with custom prompt only:", customPrompt.substring(0, 50) + "...")
+        } else if (!hasCustomPrompt && hasFilter) {
+          console.log("[thumbnail-maker] Processing with filter only:", selectedFilter.id)
         } else {
-          console.log("[thumbnail-maker] Starting image processing with filter:", selectedFilter.id)
+          console.log("[thumbnail-maker] Processing with custom prompt + filter:", selectedFilter.id)
+          console.log("[thumbnail-maker] Custom prompt:", customPrompt.substring(0, 50) + "...")
         }
 
         // Check if wallet is connected
@@ -221,16 +235,17 @@ export function CameraApp() {
         ) as typeof fetch
 
         // Make request with x402 payment handling
+        // Send both customPrompt and filter (filter may be "none")
         const requestInit: RequestInit = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(
-            useCustomPrompt
-              ? { imageUrl: imageDataUrl, customPrompt: customPrompt }
-              : { imageUrl: imageDataUrl, filter: selectedFilter.id }
-          ),
+          body: JSON.stringify({
+            imageUrl: imageDataUrl,
+            customPrompt: customPrompt,
+            filter: selectedFilter.id,
+          }),
         }
 
         const response = await fetchWithPayment("/api/process-image", requestInit)
@@ -303,7 +318,7 @@ export function CameraApp() {
         setIsProcessing(false)
       }
     },
-    [selectedFilter, isConnected, isCDPWallet, walletClient, useCustomPrompt, customPrompt],
+    [selectedFilter, isConnected, isCDPWallet, walletClient, customPrompt],
   )
 
   const handleReset = () => {
@@ -373,8 +388,6 @@ export function CameraApp() {
           isCDPWallet={isCDPWallet}
           customPrompt={customPrompt}
           setCustomPrompt={setCustomPrompt}
-          useCustomPrompt={useCustomPrompt}
-          setUseCustomPrompt={setUseCustomPrompt}
         />
       ) : (
         <ProcessedImage
