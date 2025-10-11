@@ -157,7 +157,7 @@ export function CameraApp() {
       setIsProcessing(true)
 
       try {
-        console.log("[v0] Starting image processing with filter:", selectedFilter.id)
+        console.log("[thumbnail-maker] Starting image processing with filter:", selectedFilter.id)
 
         // Check if wallet is connected
         if (!isConnected) {
@@ -173,7 +173,7 @@ export function CameraApp() {
 
         if (isCDPWallet) {
           // Using CDP embedded wallet (email sign-in)
-          console.log("[v0] Using CDP embedded wallet for x402 payment")
+          console.log("[thumbnail-maker] Using CDP embedded wallet for x402 payment")
 
           try {
             const user = await getCurrentUser()
@@ -191,12 +191,12 @@ export function CameraApp() {
               throw new Error("No CDP wallet account found")
             }
           } catch (cdpError) {
-            console.error("[v0] Failed to setup CDP wallet:", cdpError)
+            console.error("[thumbnail-maker] Failed to setup CDP wallet:", cdpError)
             throw new Error("Failed to setup embedded wallet for payment")
           }
         } else if (walletClient) {
           // Using external wallet (MetaMask, Coinbase Wallet, etc.)
-          console.log("[v0] Using external wallet for x402 payment")
+          console.log("[thumbnail-maker] Using external wallet for x402 payment")
           viemClient = walletClient.extend(publicActions)
         } else {
           throw new Error("No wallet client available")
@@ -224,28 +224,28 @@ export function CameraApp() {
 
         const response = await fetchWithPayment("/api/process-image", requestInit)
 
-        console.log("[v0] API response status:", response.status)
+        console.log("[thumbnail-maker] API response status:", response.status)
 
         if (!response.ok) {
           const errorText = await response.text()
-          console.log("[v0] API error response:", errorText)
+          console.log("[thumbnail-maker] API error response:", errorText)
           throw new Error(`Error processing image: ${response.status} ${errorText}`)
         }
 
         const data = await response.json()
-        console.log("[v0] API response data:", data)
+        console.log("[thumbnail-maker] API response data:", data)
 
         if (data.processedImageUrl) {
-          console.log("[v0] Setting processed image URL:", data.processedImageUrl)
+          console.log("[thumbnail-maker] Setting processed image URL:", data.processedImageUrl)
 
           try {
-            console.log("[v0] Adding watermark to processed image")
+            console.log("[thumbnail-maker] Adding watermark to processed image")
             const watermarkedImage = await addWatermark(data.processedImageUrl, facingMode === "user")
-            console.log("[v0] Watermark applied successfully")
+            console.log("[thumbnail-maker] Watermark applied successfully")
             setProcessedImage(watermarkedImage)
             setIsProcessing(false)
           } catch (watermarkError) {
-            console.error("[v0] Error adding watermark:", watermarkError)
+            console.error("[thumbnail-maker] Error adding watermark:", watermarkError)
             setProcessedImage(data.processedImageUrl)
             setIsProcessing(false)
           }
@@ -253,11 +253,11 @@ export function CameraApp() {
           const img = new Image()
           img.crossOrigin = "anonymous"
           img.onload = () => {
-            console.log("[v0] Processed image loaded successfully")
+          console.log("[thumbnail-maker] Processed image loaded successfully")
           }
           img.onerror = (error) => {
-            console.log("[v0] Error loading processed image:", error)
-            console.log("[v0] Falling back to original image")
+            console.log("[thumbnail-maker] Error loading processed image:", error)
+            console.log("[thumbnail-maker] Falling back to original image")
             addWatermark(imageDataUrl, facingMode === "user")
               .then((watermarkedFallback) => {
                 setProcessedImage(watermarkedFallback)
@@ -270,23 +270,23 @@ export function CameraApp() {
           }
           img.src = data.processedImageUrl
         } else {
-          console.log("[v0] No processed image URL in response, using original with watermark")
+          console.log("[thumbnail-maker] No processed image URL in response, using original with watermark")
           try {
             const watermarkedImage = await addWatermark(imageDataUrl, facingMode === "user")
             setProcessedImage(watermarkedImage)
           } catch (error) {
-            console.error("[v0] Error adding watermark to fallback:", error)
+            console.error("[thumbnail-maker] Error adding watermark to fallback:", error)
             setProcessedImage(imageDataUrl)
           }
           setIsProcessing(false)
         }
       } catch (error) {
-        console.error("[v0] Error processing image:", error)
+        console.error("[thumbnail-maker] Error processing image:", error)
         try {
           const watermarkedImage = await addWatermark(imageDataUrl, facingMode === "user")
           setProcessedImage(watermarkedImage)
         } catch (watermarkError) {
-          console.error("[v0] Error adding watermark to error fallback:", watermarkError)
+          console.error("[thumbnail-maker] Error adding watermark to error fallback:", watermarkError)
           setProcessedImage(imageDataUrl)
         }
         setIsProcessing(false)

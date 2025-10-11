@@ -8,7 +8,6 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Nano Banana Cam x402',
   description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.05 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
-  generator: 'v0.app',
   icons: {
     icon: [
       { url: '/favicon.ico' },

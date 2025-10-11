@@ -195,17 +195,17 @@ export function CameraCapture({
     const imageDataUrl = canvas.toDataURL("image/jpeg", 0.9)
     const compressedImageUrl = await compressImage(imageDataUrl)
 
-    console.log("[v0] Photo captured - hiding hint and saving to localStorage")
+    console.log("[thumbnail-maker] Photo captured - hiding hint and saving to localStorage")
     setShowSwipeHint(false)
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("banana-camera-photo-taken", "true")
         localStorage.setItem("banana_camera_photo_taken", "true") // Alternative key
         sessionStorage.setItem("banana-camera-photo-taken", "true")
-        console.log("[v0] localStorage set - banana-camera-photo-taken: true")
-        console.log("[v0] All storage locations updated")
+        console.log("[thumbnail-maker] localStorage set - banana-camera-photo-taken: true")
+        console.log("[thumbnail-maker] All storage locations updated")
       } catch (error) {
-        console.log("[v0] Error saving to localStorage:", error)
+        console.log("[thumbnail-maker] Error saving to localStorage:", error)
       }
     }
 
@@ -228,17 +228,17 @@ export function CameraCapture({
         if (imageDataUrl) {
           const compressedImageUrl = await compressImage(imageDataUrl)
 
-          console.log("[v0] Image uploaded - hiding hint and saving to localStorage")
+          console.log("[thumbnail-maker] Image uploaded - hiding hint and saving to localStorage")
           setShowSwipeHint(false)
           if (typeof window !== "undefined") {
             try {
               localStorage.setItem("banana-camera-photo-taken", "true")
               localStorage.setItem("banana_camera_photo_taken", "true") // Alternative key
               sessionStorage.setItem("banana-camera-photo-taken", "true")
-              console.log("[v0] localStorage set - banana-camera-photo-taken: true")
-              console.log("[v0] All storage locations updated")
+              console.log("[thumbnail-maker] localStorage set - banana-camera-photo-taken: true")
+              console.log("[thumbnail-maker] All storage locations updated")
             } catch (error) {
-              console.log("[v0] Error saving to localStorage:", error)
+              console.log("[thumbnail-maker] Error saving to localStorage:", error)
             }
           }
 
@@ -285,7 +285,7 @@ export function CameraCapture({
   }, [])
 
   const autoCenter = useCallback(() => {
-    console.log("[v0] Auto-centering from rotation:", wheelRotationRef.current)
+    console.log("[thumbnail-maker] Auto-centering from rotation:", wheelRotationRef.current)
 
     const startRotation = wheelRotationRef.current
     const startTime = Date.now()
@@ -307,7 +307,7 @@ export function CameraCapture({
         targetRotationRef.current = 0
         setWheelRotation(0)
         setMomentum(0)
-        console.log("[v0] Auto-center complete")
+        console.log("[thumbnail-maker] Auto-center complete")
       }
     }
 
@@ -333,7 +333,7 @@ export function CameraCapture({
       }
 
       console.log(
-        "[v0] Momentum filter change from",
+        "[thumbnail-maker] Momentum filter change from",
         filterIndex,
         "to",
         newIndex,
@@ -365,7 +365,7 @@ export function CameraCapture({
       animationFrameRef.current = requestAnimationFrame(animateMomentum)
     } else {
       isWheelAnimatingRef.current = false
-      console.log("[v0] Momentum stopped - starting auto-center")
+      console.log("[thumbnail-maker] Momentum stopped - starting auto-center")
       if (autoCenterTimeoutRef.current) {
         clearTimeout(autoCenterTimeoutRef.current)
       }
@@ -404,7 +404,7 @@ export function CameraCapture({
         }
 
         console.log(
-          "[v0] Touch drag filter change from",
+          "[thumbnail-maker] Touch drag filter change from",
           filterIndex,
           "to",
           newIndex,
@@ -454,7 +454,7 @@ export function CameraCapture({
           newIndex = filterIndex < filters.length - 1 ? filterIndex + 1 : 0
         }
 
-        console.log("[v0] Touch swipe filter change from", filterIndex, "to", newIndex, "deltaX:", deltaX)
+        console.log("[thumbnail-maker] Touch swipe filter change from", filterIndex, "to", newIndex, "deltaX:", deltaX)
         onFilterSelect(newIndex)
         setShowSwipeHint(false)
 
@@ -467,7 +467,7 @@ export function CameraCapture({
       } else if (Math.abs(deltaX) > 5 && Math.abs(velocityRef.current) > 0.3) {
         animateMomentum()
       } else {
-        console.log("[v0] Touch end - starting auto-center")
+        console.log("[thumbnail-maker] Touch end - starting auto-center")
         if (autoCenterTimeoutRef.current) {
           clearTimeout(autoCenterTimeoutRef.current)
         }
@@ -504,7 +504,7 @@ export function CameraCapture({
       wheelRotationRef.current += direction * scrollIntensity * 0.15 // Reduced from 0.25
       velocityRef.current = direction * scrollIntensity * 0.05 // Reduced from 0.08
 
-      console.log("[v0] Wheel event, rotation:", wheelRotationRef.current, "direction:", direction)
+      console.log("[thumbnail-maker] Wheel event, rotation:", wheelRotationRef.current, "direction:", direction)
 
       if (Math.abs(wheelRotationRef.current) > 25) {
         // Reduced from 35
@@ -516,7 +516,7 @@ export function CameraCapture({
           newIndex = filterIndex > 0 ? filterIndex - 1 : filters.length - 1
         }
 
-        console.log("[v0] Wheel filter change from", filterIndex, "to", newIndex)
+        console.log("[thumbnail-maker] Wheel filter change from", filterIndex, "to", newIndex)
         onFilterSelect(newIndex)
         setShowSwipeHint(false)
 
@@ -651,11 +651,11 @@ export function CameraCapture({
   }, [])
 
   useEffect(() => {
-    console.log("[v0] Camera state - isLoading:", isLoading, "error:", error)
+    console.log("[thumbnail-maker] Camera state - isLoading:", isLoading, "error:", error)
   }, [isLoading, error])
 
   useEffect(() => {
-    console.log("[v0] showSwipeHint state changed to:", showSwipeHint)
+    console.log("[thumbnail-maker] showSwipeHint state changed to:", showSwipeHint)
   }, [showSwipeHint])
 
   // Check localStorage for photo taken status (client-side only to avoid hydration errors)
@@ -669,11 +669,11 @@ export function CameraCapture({
         const photoWasTaken = hasEverTakenPhoto === "true" || hasEverTakenPhotoAlt === "true" || sessionFlag === "true"
 
         if (photoWasTaken) {
-          console.log("[v0] Photo was taken before, hiding swipe hint")
+          console.log("[thumbnail-maker] Photo was taken before, hiding swipe hint")
           setShowSwipeHint(false)
         }
       } catch (error) {
-        console.log("[v0] Error reading localStorage:", error)
+        console.log("[thumbnail-maker] Error reading localStorage:", error)
       }
     }
   }, [])
@@ -734,13 +734,7 @@ export function CameraCapture({
 
       <div className="absolute top-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-b from-black/50 to-transparent pointer-events-auto z-20">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <img
-              src="/banana-camera-logo.png"
-              alt="Banana Camera"
-              className="w-12 h-12 md:w-24 md:h-24 object-contain"
-            />
-          </div>
+          
 
           <div className="flex items-center space-x-2 ml-auto">
             {/* Auth/Wallet Section - Different UI based on wallet type */}

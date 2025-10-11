@@ -247,8 +247,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
     }
 
-    console.log("[v0] Processing image with Nano Banana:", filter)
-    console.log("[v0] Using dramatic transformation prompt")
+    console.log("[thumbnail-maker] Processing image with Nano Banana:", filter)
+    console.log("[thumbnail-maker] Using dramatic transformation prompt")
 
     const result = await fal.subscribe("fal-ai/nano-banana/edit", {
       input: {
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("[v0] Nano Banana transformation result:", result)
+    console.log("[thumbnail-maker] Nano Banana transformation result:", result)
 
     const processedImageUrl = result.data?.images?.[0]?.url
 
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
       throw new Error("No processed image returned from Nano Banana")
     }
 
-    console.log("[v0] Returning processed image without watermark")
+    console.log("[thumbnail-maker] Returning processed image without watermark")
 
     // 5. Add payment receipt to response headers (payment already settled before processing)
     const headers: Record<string, string> = {
@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
       { headers }
     )
   } catch (error) {
-    console.error("[v0] Error with Nano Banana processing:", error)
+    console.error("[thumbnail-maker] Error with Nano Banana processing:", error)
     return NextResponse.json(
       {
         error: "Failed to process image with Nano Banana",

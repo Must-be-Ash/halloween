@@ -13,10 +13,10 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
     img.crossOrigin = "anonymous"
 
     img.onload = () => {
-      console.log("[v0] Watermark - Image loaded, dimensions:", img.width, "x", img.height)
+      console.log("[thumbnail-maker] Watermark - Image loaded, dimensions:", img.width, "x", img.height)
 
       const devicePixelRatio = window.devicePixelRatio || 1
-      console.log("[v0] Watermark - Device pixel ratio:", devicePixelRatio)
+      console.log("[thumbnail-maker] Watermark - Device pixel ratio:", devicePixelRatio)
 
       // Set canvas size to match image with device pixel ratio for sharp rendering
       canvas.width = img.width * devicePixelRatio
@@ -36,7 +36,7 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       // Draw the original image without any transformations
       ctx.drawImage(img, 0, 0)
 
-      const watermarkText = "Created with v0, Fal, Nano Banana, and x402"
+      const watermarkText = "Created with Fal (Nano Banana) & x402"
 
       const minFontSize = 80
       const widthBasedSize = img.width / 2.5
@@ -44,7 +44,7 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       const calculatedSize = Math.min(widthBasedSize, heightBasedSize)
       const fontSize = Math.max(minFontSize, calculatedSize)
 
-      console.log("[v0] Watermark - Font size calculation:")
+      console.log("[thumbnail-maker] Watermark - Font size calculation:")
       console.log("  - Minimum font size:", minFontSize)
       console.log("  - Width-based size (width/2.5):", widthBasedSize)
       console.log("  - Height-based size (height/2.5):", heightBasedSize)
@@ -61,7 +61,7 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       const x = img.width - padding
       const y = img.height - padding
 
-      console.log("[v0] Watermark - Position calculation:")
+      console.log("[thumbnail-maker] Watermark - Position calculation:")
       console.log("  - Padding:", padding)
       console.log("  - X position:", x)
       console.log("  - Y position:", y)
@@ -72,19 +72,19 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       ctx.shadowOffsetX = 5
       ctx.shadowOffsetY = 5
 
-      console.log("[v0] Watermark - Drawing text with font:", ctx.font)
+      console.log("[thumbnail-maker] Watermark - Drawing text with font:", ctx.font)
       ctx.fillText(watermarkText, x, y)
-      console.log("[v0] Watermark - Text drawn successfully")
+      console.log("[thumbnail-maker] Watermark - Text drawn successfully")
 
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            console.log("[v0] Watermark - Blob created successfully, size:", blob.size, "bytes")
+            console.log("[thumbnail-maker] Watermark - Blob created successfully, size:", blob.size, "bytes")
             const watermarkedUrl = URL.createObjectURL(blob)
-            console.log("[v0] Watermark - Final watermarked URL created")
+            console.log("[thumbnail-maker] Watermark - Final watermarked URL created")
             resolve(watermarkedUrl)
           } else {
-            console.error("[v0] Watermark - Failed to create blob")
+            console.error("[thumbnail-maker] Watermark - Failed to create blob")
             reject(new Error("Failed to create watermarked image"))
           }
         },
