@@ -3,6 +3,7 @@ import { fal } from "@fal-ai/client"
 import { rateLimiter, getClientIP } from "@/lib/rate-limiter"
 import { facilitator } from "@coinbase/x402"
 import { useFacilitator } from "x402/verify"
+import { createThumbnailPrompt } from "@/lib/thumbnail-prompt"
 
 // Configure fal client
 fal.config({
@@ -236,23 +237,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { imageUrl, filter } = await request.json()
+    const { imageUrl, filter, customPrompt } = await request.json()
 
-    if (!imageUrl || !filter) {
-      return NextResponse.json({ error: "Image URL and filter are required" }, { status: 400 })
+    if (!imageUrl) {
+      return NextResponse.json({ error: "Image URL is required" }, { status: 400 })
     }
 
-    const config = filterConfigs[filter as keyof typeof filterConfigs]
-    if (!config) {
-      return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
+    // Determine which prompt to use: custom or filter template
+    let finalPrompt: string
+
+    if (customPrompt) {
+      // User provided custom thumbnail description
+      finalPrompt = createThumbnailPrompt(customPrompt)
+      console.log("[thumbnail-maker] Processing with custom prompt:", customPrompt.substring(0, 100) + "...")
+    } else if (filter) {
+      // Using existing filter template
+      const config = filterConfigs[filter as keyof typeof filterConfigs]
+      if (!config) {
+        return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
+      }
+      finalPrompt = config.prompt
+      console.log("[thumbnail-maker] Processing image with filter:", filter)
+    } else {
+      return NextResponse.json({ error: "Either filter or customPrompt is required" }, { status: 400 })
     }
 
-    console.log("[thumbnail-maker] Processing image with Nano Banana:", filter)
-    console.log("[thumbnail-maker] Using dramatic transformation prompt")
+    console.log("[thumbnail-maker] Using transformation prompt")
 
     const result = await fal.subscribe("fal-ai/nano-banana/edit", {
       input: {
-        prompt: config.prompt,
+        prompt: finalPrompt,
         image_urls: [imageUrl],
         num_images: 1,
       },

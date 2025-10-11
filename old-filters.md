@@ -133,8 +133,6 @@ export function CameraApp() {
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [capturedWithFrontCamera, setCapturedWithFrontCamera] = useState(false)
-  const [customPrompt, setCustomPrompt] = useState<string>("")
-  const [useCustomPrompt, setUseCustomPrompt] = useState(false)
 
   // Wagmi hooks - now detect BOTH CDP and external wallets
   const { address, isConnected, connector } = useAccount()
@@ -159,15 +157,7 @@ export function CameraApp() {
       setIsProcessing(true)
 
       try {
-        // Check if using custom prompt or filter template
-        if (useCustomPrompt) {
-          if (!customPrompt.trim()) {
-            throw new Error("Please enter a description for your thumbnail")
-          }
-          console.log("[thumbnail-maker] Starting image processing with custom prompt:", customPrompt.substring(0, 50) + "...")
-        } else {
-          console.log("[thumbnail-maker] Starting image processing with filter:", selectedFilter.id)
-        }
+        console.log("[thumbnail-maker] Starting image processing with filter:", selectedFilter.id)
 
         // Check if wallet is connected
         if (!isConnected) {
@@ -226,11 +216,10 @@ export function CameraApp() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(
-            useCustomPrompt
-              ? { imageUrl: imageDataUrl, customPrompt: customPrompt }
-              : { imageUrl: imageDataUrl, filter: selectedFilter.id }
-          ),
+          body: JSON.stringify({
+            imageUrl: imageDataUrl,
+            filter: selectedFilter.id,
+          }),
         }
 
         const response = await fetchWithPayment("/api/process-image", requestInit)
@@ -303,7 +292,7 @@ export function CameraApp() {
         setIsProcessing(false)
       }
     },
-    [selectedFilter, isConnected, isCDPWallet, walletClient, useCustomPrompt, customPrompt],
+    [selectedFilter, isConnected, isCDPWallet, walletClient],
   )
 
   const handleReset = () => {
@@ -371,10 +360,6 @@ export function CameraApp() {
           isWalletConnected={isConnected}
           walletAddress={address || undefined}
           isCDPWallet={isCDPWallet}
-          customPrompt={customPrompt}
-          setCustomPrompt={setCustomPrompt}
-          useCustomPrompt={useCustomPrompt}
-          setUseCustomPrompt={setUseCustomPrompt}
         />
       ) : (
         <ProcessedImage

@@ -52,6 +52,10 @@ interface CameraCaptureProps {
   isWalletConnected: boolean
   walletAddress?: `0x${string}`
   isCDPWallet: boolean
+  customPrompt: string
+  setCustomPrompt: (prompt: string) => void
+  useCustomPrompt: boolean
+  setUseCustomPrompt: (use: boolean) => void
 }
 
 export function CameraCapture({
@@ -62,7 +66,11 @@ export function CameraCapture({
   filters,
   isWalletConnected,
   walletAddress,
-  isCDPWallet
+  isCDPWallet,
+  customPrompt,
+  setCustomPrompt,
+  useCustomPrompt,
+  setUseCustomPrompt
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -819,68 +827,113 @@ export function CameraCapture({
           </LiquidGlass>
         </div>
 
-        <div className="flex justify-center mt-4 md:mt-6">
-          <div
-            className="px-6 md:px-8 py-3 relative overflow-hidden bg-black/20 backdrop-blur-sm"
-            style={{
-              borderRadius: "24px",
-              width: "min(280px, calc(100vw - 48px))",
-            }}
-          >
-            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
+        {/* Mode Toggle */}
+        <div className="flex justify-center mt-3">
+          <div className="bg-black/30 backdrop-blur-sm p-1 rounded-full flex gap-1">
+            <button
+              onClick={() => setUseCustomPrompt(false)}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+                !useCustomPrompt
+                  ? "bg-orange-500 text-white"
+                  : "text-white/60 hover:text-white/80"
+              }`}
+            >
+              Templates
+            </button>
+            <button
+              onClick={() => setUseCustomPrompt(true)}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+                useCustomPrompt
+                  ? "bg-orange-500 text-white"
+                  : "text-white/60 hover:text-white/80"
+              }`}
+            >
+              Custom
+            </button>
+          </div>
+        </div>
 
-            <div className="flex items-center justify-center relative" style={{ height: "28px" }}>
-              <div
-                className="flex items-center"
-                style={{
-                  transform: `translateX(${wheelRotation === 0 ? 0 : wheelRotation * (window.innerWidth < 768 ? 0.25 : 0.35)}px)`,
-                  transition: isTransitioning
-                    ? "transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                    : wheelRotation === 0
-                      ? "transform 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                      : "none",
-                  width: "100%",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
-              >
-                {(() => {
-                  const prevIndex = filterIndex > 0 ? filterIndex - 1 : filters.length - 1
-                  const nextIndex = filterIndex < filters.length - 1 ? filterIndex + 1 : 0
+        {/* Filter Selector or Custom Input */}
+        <div className="flex justify-center mt-3 md:mt-4">
+          {!useCustomPrompt ? (
+            // Template Mode: Show filter carousel
+            <div
+              className="px-6 md:px-8 py-3 relative overflow-hidden bg-black/20 backdrop-blur-sm"
+              style={{
+                borderRadius: "24px",
+                width: "min(280px, calc(100vw - 48px))",
+              }}
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
 
-                  const visibleFilters = [
-                    { filter: filters[prevIndex], index: prevIndex, position: "prev" },
-                    { filter: filters[filterIndex], index: filterIndex, position: "current" },
-                    { filter: filters[nextIndex], index: nextIndex, position: "next" },
-                  ]
+              <div className="flex items-center justify-center relative" style={{ height: "28px" }}>
+                <div
+                  className="flex items-center"
+                  style={{
+                    transform: `translateX(${wheelRotation === 0 ? 0 : wheelRotation * (window.innerWidth < 768 ? 0.25 : 0.35)}px)`,
+                    transition: isTransitioning
+                      ? "transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                      : wheelRotation === 0
+                        ? "transform 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                        : "none",
+                    width: "100%",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                >
+                  {(() => {
+                    const prevIndex = filterIndex > 0 ? filterIndex - 1 : filters.length - 1
+                    const nextIndex = filterIndex < filters.length - 1 ? filterIndex + 1 : 0
 
-                  return visibleFilters.map(({ filter, index, position }) => {
-                    const isCurrent = position === "current"
+                    const visibleFilters = [
+                      { filter: filters[prevIndex], index: prevIndex, position: "prev" },
+                      { filter: filters[filterIndex], index: filterIndex, position: "current" },
+                      { filter: filters[nextIndex], index: nextIndex, position: "next" },
+                    ]
 
-                    return (
-                      <button
-                        key={`${filter.id}-${position}`}
-                        onClick={() => handleFilterChange(index)}
-                        className={`font-mono text-sm font-medium flex-shrink-0 text-center transition-all duration-300 whitespace-nowrap relative px-4 py-2 rounded-full ${
-                          isCurrent
-                            ? "text-yellow-400 bg-white/10 backdrop-blur-sm border border-white/20"
-                            : "text-white/60 hover:text-white/80"
-                        }`}
-                        style={{
-                          transition: isTransitioning
-                            ? "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                            : "all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                        }}
-                      >
-                        <span className="relative z-10">{filter.name}</span>
-                      </button>
-                    )
-                  })
-                })()}
+                    return visibleFilters.map(({ filter, index, position }) => {
+                      const isCurrent = position === "current"
+
+                      return (
+                        <button
+                          key={`${filter.id}-${position}`}
+                          onClick={() => handleFilterChange(index)}
+                          className={`font-mono text-sm font-medium flex-shrink-0 text-center transition-all duration-300 whitespace-nowrap relative px-4 py-2 rounded-full ${
+                            isCurrent
+                              ? "text-yellow-400 bg-white/10 backdrop-blur-sm border border-white/20"
+                              : "text-white/60 hover:text-white/80"
+                          }`}
+                          style={{
+                            transition: isTransitioning
+                              ? "all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                              : "all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                          }}
+                        >
+                          <span className="relative z-10">{filter.name}</span>
+                        </button>
+                      )
+                    })
+                  })()}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            // Custom Mode: Show text input
+            <div className="w-full max-w-md px-4">
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder="Describe your thumbnail... (e.g., 'green graph going up with dollar signs and text saying I made $20k')"
+                className="w-full bg-black/30 backdrop-blur-sm text-white placeholder-white/40 px-4 py-3 rounded-2xl border border-white/20 focus:border-orange-400 focus:outline-none resize-none text-sm"
+                rows={3}
+                style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
+              />
+              <div className="mt-2 text-center text-xs text-white/50">
+                AI will keep your face recognizable while creating your thumbnail
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
