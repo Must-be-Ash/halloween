@@ -1,17 +1,43 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useEvmAddress } from "@coinbase/cdp-hooks"
 import { FundModal, type FundModalProps } from "@coinbase/cdp-react"
 import { getBuyOptions, createBuyQuote } from "@/lib/onramp-api"
 
+interface LocationData {
+  country: string
+  subdivision?: string
+  detected: boolean
+}
+
 export function FundWalletButton() {
   const { evmAddress } = useEvmAddress()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [location, setLocation] = useState<LocationData>({
+    country: "US",
+    subdivision: "CA",
+    detected: false,
+  })
 
-  // Get the user's location (for Onramp) - you can customize this
-  const userCountry = "US"
-  const userSubdivision = "CA"
+  // Detect user's location on mount
+  useEffect(() => {
+    async function detectLocation() {
+      try {
+        const response = await fetch("/api/location")
+        if (response.ok) {
+          const data: LocationData = await response.json()
+          setLocation(data)
+          console.log(`[FundWallet] Location detected: ${data.country}${data.subdivision ? `/${data.subdivision}` : ""}`)
+        }
+      } catch (error) {
+        console.error("[FundWallet] Failed to detect location:", error)
+        // Keep default US/CA
+      }
+    }
+
+    detectLocation()
+  }, [])
 
   // Onramp API callback functions
   const fetchBuyQuote: FundModalProps["fetchBuyQuote"] = useCallback(async params => {
@@ -49,8 +75,8 @@ export function FundWalletButton() {
           open={isModalOpen}
           setIsOpen={setIsModalOpen}
           destinationAddress={evmAddress}
-          country={userCountry}
-          subdivision={userSubdivision}
+          country={location.country}
+          subdivision={location.subdivision}
           cryptoCurrency="usdc"
           fiatCurrency="usd"
           fetchBuyQuote={fetchBuyQuote}

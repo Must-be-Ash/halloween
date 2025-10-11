@@ -7,6 +7,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useDisconnect } from "wagmi"
 import { AuthModal } from "./auth-modal"
 import { LiquidGlass } from "./liquid-glass"
+import { FundWalletButton } from "./fund-wallet-button"
 import type { Filter } from "./camera-app"
 
 const CameraIcon = ({ className }: { className?: string }) => (
@@ -751,22 +752,25 @@ export function CameraCapture({
                 Connect Wallet
               </button>
             ) : isCDPWallet ? (
-              // CDP wallet: show custom UI with address and disconnect
-              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-white text-sm font-mono">
-                    {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : "Connected"}
-                  </span>
+              // CDP wallet: show custom UI with address, top up button, and disconnect
+              <>
+                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-white text-sm font-mono">
+                      {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : "Connected"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => disconnect()}
+                    className="text-white/60 hover:text-white text-xs transition-colors"
+                    title="Disconnect"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <button
-                  onClick={() => disconnect()}
-                  className="text-white/60 hover:text-white text-xs transition-colors"
-                  title="Disconnect"
-                >
-                  ✕
-                </button>
-              </div>
+                <FundWalletButton />
+              </>
             ) : (
               // External wallet: show RainbowKit UI
               <div className="mr-2">
