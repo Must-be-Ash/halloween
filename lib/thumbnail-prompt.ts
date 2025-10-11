@@ -1,19 +1,53 @@
 /**
  * Creates a professional thumbnail prompt that preserves person identity
- * while applying user's custom scene description
+ * while applying user's custom scene description with COMPLETE CINEMATIC MAKEOVER
  *
- * This template is based on our proven filter patterns that ensure:
- * - Exact facial features are preserved
- * - Natural skin textures maintained
- * - Only clothing/environment changes
- * - Photorealistic, professional quality
+ * This enhanced template matches the quality of our best filters by:
+ * - Preserving exact facial features and identity (CRITICAL)
+ * - Transforming clothing, styling, environment, lighting completely
+ * - Adding rich details, textures, materials, atmosphere
+ * - Creating a cohesive cinematic world around the user's theme
+ * - Photorealistic, professional movie-still quality
  */
 export function createThumbnailPrompt(userDescription: string): string {
-  return `Create a HYPER-REALISTIC, PHOTOGRAPHIC transformation suitable for a professional video thumbnail.
+  return `Create a HYPER-REALISTIC, PHOTOGRAPHIC transformation suitable for a professional video thumbnail with COMPLETE CINEMATIC MAKEOVER.
 
-ULTRA-REALISTIC DETAILS: For PEOPLE: maintain exact facial features with natural skin textures and authentic body proportions, style with appropriate clothing and expression that matches the scene. ${userDescription}
+CRITICAL TRANSFORMATION REQUIREMENTS:
 
-Apply dramatic, high-contrast lighting with professional thumbnail atmosphere that catches viewer attention.
+For PEOPLE:
+- MAINTAIN exact facial features, facial structure, and face identity (CRITICAL - face must remain clearly recognizable)
+- TRANSFORM EVERYTHING ELSE: Apply complete professional styling including:
+  * Professional clothing, outfit, and accessories that match the theme/scenario
+  * Professional hair styling and grooming appropriate to the theme
+  * Makeup and styling for high-quality thumbnail photography
+  * Natural skin textures with professional lighting enhancements
+  * Appropriate expression and pose that matches the scene energy
 
-CRITICAL: Must look like an actual professional photograph taken for a YouTube thumbnail, with authentic materials, realistic lighting, and perfect photography quality. The person's face and identity must remain clearly recognizable. No cartoon or digital art effects.`;
+For ENVIRONMENT & SCENE:
+- Create a COMPLETELY REIMAGINED background environment with:
+  * Photorealistic setting with rich environmental details
+  * Authentic materials, textures, and atmospheric elements
+  * Professional props and scene elements that enhance the narrative
+  * Cinematic depth and layering with realistic perspective
+  * Rich color palette and atmospheric effects
+
+For LIGHTING & ATMOSPHERE:
+- Apply dramatic, high-contrast professional lighting with:
+  * Cinematic lighting setup appropriate to the theme
+  * Professional color grading and atmospheric mood
+  * Realistic shadows, highlights, and light physics
+  * Attention-grabbing visual impact suitable for thumbnails
+
+USER'S SPECIFIC REQUIREMENTS:
+${userDescription}
+
+EXECUTION INSTRUCTIONS:
+- Interpret the user's description as the THEME and CONTENT to include
+- Build a complete cinematic world around that theme
+- Transform clothing, environment, lighting, and styling to create a cohesive aesthetic
+- Add rich details, textures, materials, and atmospheric elements
+- Maintain photorealistic quality with professional photography standards
+- The final result should look like a professionally produced promotional photograph or movie still
+
+CRITICAL: The person's FACE and FACIAL IDENTITY must remain exactly recognizable. Transform everything else (clothing, hair styling, environment, lighting, props) to create a complete cinematic makeover. No cartoon or digital art effects - only photorealistic transformations.`;
 }
