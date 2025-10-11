@@ -4,6 +4,8 @@ import type React from "react"
 
 import { useState, useRef, useCallback, useEffect } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { useDisconnect } from "wagmi"
+import { AuthModal } from "./auth-modal"
 import { LiquidGlass } from "./liquid-glass"
 import type { Filter } from "./camera-app"
 
@@ -49,6 +51,7 @@ interface CameraCaptureProps {
   filters: Filter[]
   isWalletConnected: boolean
   walletAddress?: `0x${string}`
+  isCDPWallet: boolean
 }
 
 export function CameraCapture({
@@ -58,7 +61,8 @@ export function CameraCapture({
   filterIndex,
   filters,
   isWalletConnected,
-  walletAddress
+  walletAddress,
+  isCDPWallet
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -88,6 +92,12 @@ export function CameraCapture({
   const targetRotationRef = useRef(0)
   const isWheelAnimatingRef = useRef(false)
   const autoCenterTimeoutRef = useRef<NodeJS.Timeout>()
+
+  // Auth modal state
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+
+  // Wagmi disconnect hook
+  const { disconnect } = useDisconnect()
 
   const startCamera = useCallback(
     async (facing: "user" | "environment" = facingMode) => {
@@ -733,17 +743,45 @@ export function CameraCapture({
           </div>
 
           <div className="flex items-center space-x-2 ml-auto">
-            {/* Wallet Connect Button */}
-            <div className="mr-2">
-              <ConnectButton
-                chainStatus="none"
-                showBalance={false}
-                accountStatus={{
-                  smallScreen: "avatar",
-                  largeScreen: "full"
-                }}
-              />
-            </div>
+            {/* Auth/Wallet Section - Different UI based on wallet type */}
+            {!isWalletConnected ? (
+              // Not connected: show custom connect button
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Connect Wallet
+              </button>
+            ) : isCDPWallet ? (
+              // CDP wallet: show custom UI with address and disconnect
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-white text-sm font-mono">
+                    {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : "Connected"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => disconnect()}
+                  className="text-white/60 hover:text-white text-xs transition-colors"
+                  title="Disconnect"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              // External wallet: show RainbowKit UI
+              <div className="mr-2">
+                <ConnectButton
+                  chainStatus="none"
+                  showBalance={false}
+                  accountStatus={{
+                    smallScreen: "avatar",
+                    largeScreen: "full"
+                  }}
+                />
+              </div>
+            )}
 
             <LiquidGlass
               variant="button"
@@ -767,6 +805,9 @@ export function CameraCapture({
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 pb-12 md:pb-8 bg-gradient-to-t from-black/50 to-transparent pointer-events-auto z-20">
         <div className="flex justify-center items-center">

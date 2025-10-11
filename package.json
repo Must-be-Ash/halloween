@@ -9,6 +9,11 @@
     "start": "next start"
   },
   "dependencies": {
+    "@coinbase/cdp-core": "^0.0.43",
+    "@coinbase/cdp-hooks": "^0.0.43",
+    "@coinbase/cdp-react": "^0.0.43",
+    "@coinbase/cdp-sdk": "^1.38.4",
+    "@coinbase/cdp-wagmi": "^0.0.43",
     "@coinbase/x402": "^0.6.6",
     "@fal-ai/client": "latest",
     "@fal-ai/serverless-client": "0.15.0",

@@ -1,9 +1,13 @@
 "use client"
 import { useState, useCallback } from "react"
 import { useAccount, useWalletClient } from "wagmi"
+import { useEvmAddress } from "@coinbase/cdp-hooks"
+import { getCurrentUser, toViemAccount } from "@coinbase/cdp-core"
 import { CameraCapture } from "./camera-capture"
 import { ProcessedImage } from "./processed-image"
 import { addWatermark } from "../lib/watermark"
+import { createWalletClient, http, publicActions } from "viem"
+import { base } from "viem/chains"
 
 export type FilterType =
   | "acid"
@@ -130,9 +134,17 @@ export function CameraApp() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [capturedWithFrontCamera, setCapturedWithFrontCamera] = useState(false)
 
-  // Wagmi hooks for wallet connectivity
-  const { address, isConnected } = useAccount()
+  // Wagmi hooks - now detect BOTH CDP and external wallets
+  const { address, isConnected, connector } = useAccount()
   const { data: walletClient } = useWalletClient()
+
+  // Detect wallet type based on connector
+  // CDP connector has id/name containing "cdp" or "embedded"
+  const isCDPWallet = Boolean(
+    connector?.id?.toLowerCase().includes('cdp') ||
+    connector?.id?.toLowerCase().includes('embedded') ||
+    connector?.name?.toLowerCase().includes('cdp')
+  );
 
   const selectedFilter = filters[selectedFilterIndex]
 
@@ -148,23 +160,55 @@ export function CameraApp() {
         console.log("[v0] Starting image processing with filter:", selectedFilter.id)
 
         // Check if wallet is connected
-        if (!isConnected || !walletClient) {
+        if (!isConnected) {
           throw new Error("Please connect your wallet to process images")
         }
 
-        // Import x402-fetch and viem publicActions
+        // Import x402-fetch
         const { wrapFetchWithPayment } = await import("x402-fetch")
-        const { publicActions } = await import("viem")
 
-        // Extend wallet client with public actions (required by x402-fetch)
-        const extendedClient = walletClient.extend(publicActions)
+        // Create viem client based on wallet type
+        // Type annotation bypasses complex viem/x402 type incompatibility
+        let viemClient: any
+
+        if (isCDPWallet) {
+          // Using CDP embedded wallet (email sign-in)
+          console.log("[v0] Using CDP embedded wallet for x402 payment")
+
+          try {
+            const user = await getCurrentUser()
+            if (user && user.evmAccounts && user.evmAccounts.length > 0) {
+              const viemAccount = await toViemAccount(user.evmAccounts[0])
+              const chain = base
+              const rpcUrl = 'https://mainnet.base.org'
+
+              viemClient = createWalletClient({
+                account: viemAccount,
+                chain: chain,
+                transport: http(rpcUrl),
+              }).extend(publicActions)
+            } else {
+              throw new Error("No CDP wallet account found")
+            }
+          } catch (cdpError) {
+            console.error("[v0] Failed to setup CDP wallet:", cdpError)
+            throw new Error("Failed to setup embedded wallet for payment")
+          }
+        } else if (walletClient) {
+          // Using external wallet (MetaMask, Coinbase Wallet, etc.)
+          console.log("[v0] Using external wallet for x402 payment")
+          viemClient = walletClient.extend(publicActions)
+        } else {
+          throw new Error("No wallet client available")
+        }
 
         // Create wrapped fetch with payment handling
+        // @ts-ignore - viem client types are compatible but TypeScript has issues with complex generics
         const fetchWithPayment = wrapFetchWithPayment(
           fetch,
-          extendedClient,
+          viemClient,
           BigInt(0.1 * 10 ** 6) // Max payment: $0.10 USDC
-        )
+        ) as typeof fetch
 
         // Make request with x402 payment handling
         const requestInit: RequestInit = {
@@ -248,7 +292,7 @@ export function CameraApp() {
         setIsProcessing(false)
       }
     },
-    [selectedFilter, isConnected, walletClient],
+    [selectedFilter, isConnected, isCDPWallet, walletClient],
   )
 
   const handleReset = () => {
@@ -314,7 +358,8 @@ export function CameraApp() {
           filterIndex={selectedFilterIndex}
           filters={filters}
           isWalletConnected={isConnected}
-          walletAddress={address}
+          walletAddress={address || undefined}
+          isCDPWallet={isCDPWallet}
         />
       ) : (
         <ProcessedImage

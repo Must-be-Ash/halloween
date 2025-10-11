@@ -1,17 +1,53 @@
 "use client";
 
-import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { WagmiProvider } from "wagmi";
+import { RainbowKitProvider, connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { metaMaskWallet, coinbaseWallet, walletConnectWallet } from "@rainbow-me/rainbowkit/wallets";
+import { WagmiProvider, createConfig, http } from "wagmi";
 import { base } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { createCDPEmbeddedWalletConnector } from "@coinbase/cdp-wagmi";
+import { CDPReactProvider } from "@coinbase/cdp-react";
+import { CDP_CONFIG } from "@/lib/config";
 import "@rainbow-me/rainbowkit/styles.css";
 
 const queryClient = new QueryClient();
 
-const config = getDefaultConfig({
-  appName: "Nano Banana Cam",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+// Create CDP Embedded Wallet connector
+const cdpConnector = createCDPEmbeddedWalletConnector({
+  cdpConfig: CDP_CONFIG,
+  providerConfig: {
+    chains: [base],
+    transports: {
+      [base.id]: http(),
+    },
+  },
+});
+
+// Create external wallet connectors using RainbowKit
+const externalWalletConnectors = connectorsForWallets(
+  [
+    {
+      groupName: "Popular",
+      wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet],
+    },
+  ],
+  {
+    appName: "Nano Banana Cam x402",
+    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+  }
+);
+
+// Create wagmi config with BOTH CDP connector and external wallet connectors
+// This allows wagmi to detect both CDP email wallets and external wallets
+const config = createConfig({
+  connectors: [
+    cdpConnector,  // CDP embedded wallet (email sign-in)
+    ...externalWalletConnectors,  // External wallets from RainbowKit
+  ],
   chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
   ssr: true,
 });
 
@@ -21,12 +57,14 @@ interface ProvidersProps {
 
 export default function Providers({ children }: ProvidersProps) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <CDPReactProvider config={CDP_CONFIG}>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            {children}
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </CDPReactProvider>
   );
 }
