@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react"
 import { useEvmAddress } from "@coinbase/cdp-hooks"
 import { FundModal, type FundModalProps } from "@coinbase/cdp-react"
 import { getBuyOptions, createBuyQuote } from "@/lib/onramp-api"
+import { ModernButton } from "@/components/ui/modern-button"
 
 interface LocationData {
   country: string
@@ -60,15 +61,12 @@ export function FundWalletButton() {
 
   return (
     <>
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
-      >
+      <ModernButton onClick={() => setIsModalOpen(true)} size="sm">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
-        <span>Fund Wallet</span>
-      </button>
+        <span>Top Up</span>
+      </ModernButton>
 
       {isModalOpen && evmAddress && (
         <FundModal

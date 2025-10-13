@@ -8,6 +8,7 @@ import { useDisconnect } from "wagmi"
 import { AuthModal } from "./auth-modal"
 import { LiquidGlass } from "./liquid-glass"
 import { FundWalletButton } from "./fund-wallet-button"
+import { ModernButton } from "./ui/modern-button"
 import type { Filter } from "./camera-app"
 
 const CameraIcon = ({ className }: { className?: string }) => (
@@ -745,12 +746,9 @@ export function CameraCapture({
             {/* Auth/Wallet Section - Different UI based on wallet type */}
             {!isWalletConnected ? (
               // Not connected: show custom connect button
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
+              <ModernButton onClick={() => setIsAuthModalOpen(true)} size="sm">
                 Connect Wallet
-              </button>
+              </ModernButton>
             ) : isCDPWallet ? (
               // CDP wallet: show custom UI with address, top up button, and disconnect
               <>
@@ -785,25 +783,13 @@ export function CameraCapture({
               </div>
             )}
 
-            <LiquidGlass
-              variant="button"
-              intensity="medium"
-              onClick={triggerImageUpload}
-              className="text-white rounded-full w-10 h-10 p-0 flex items-center justify-center"
-              style={{ borderRadius: "50%" }}
-            >
+            <ModernButton onClick={triggerImageUpload} className="rounded-full w-10 h-10 p-0 flex items-center justify-center" size="custom">
               <UploadIcon className="w-4 h-4" />
-            </LiquidGlass>
+            </ModernButton>
 
-            <LiquidGlass
-              variant="button"
-              intensity="medium"
-              onClick={switchCamera}
-              className="text-white rounded-full w-10 h-10 p-0 flex items-center justify-center"
-              style={{ borderRadius: "50%" }}
-            >
+            <ModernButton onClick={switchCamera} className="rounded-full w-10 h-10 p-0 flex items-center justify-center" size="custom">
               <SwitchCameraIcon className="w-5 h-5" />
-            </LiquidGlass>
+            </ModernButton>
           </div>
         </div>
       </div>
