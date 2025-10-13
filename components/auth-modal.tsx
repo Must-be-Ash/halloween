@@ -42,7 +42,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         </div>
 
         {/* Top Card - Main Content with Drop Shadow */}
-        <div className="relative bg-white rounded-3xl shadow-2xl border border-[#333333] p-8">
+        <div className="relative bg-[#E8E8E8] rounded-3xl shadow-2xl border border-[#333333] p-8">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-all duration-200"

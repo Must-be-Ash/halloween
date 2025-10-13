@@ -1,5 +1,6 @@
 "use client"
 import { LiquidGlass } from "./liquid-glass"
+import { ModernButton } from "./ui/modern-button"
 import { Sparkles, Download, RotateCcw, X } from "lucide-react" // removed Share import
 
 interface ProcessedImageProps {
@@ -77,15 +78,13 @@ export function ProcessedImage({
         {/* Top controls */}
         <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/50 to-transparent">
           <div className="flex justify-between items-center">
-            <LiquidGlass
-              variant="button"
-              intensity="medium"
+            <ModernButton
               onClick={onReset}
-              className="text-white rounded-full w-10 h-10 p-0 flex items-center justify-center"
-              style={{ borderRadius: "50%" }}
+              className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
+              size="custom"
             >
               <X className="w-5 h-5" />
-            </LiquidGlass>
+            </ModernButton>
 
             <div className="flex items-center space-x-2 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
               <Sparkles className="w-4 h-4 text-white" />

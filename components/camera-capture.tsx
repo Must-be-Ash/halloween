@@ -229,6 +229,13 @@ export function CameraCapture({
     capturePhoto()
   }, [isWalletConnected, capturePhoto])
 
+  const handlePromptKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Stop arrow keys from bubbling up to container
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.stopPropagation()
+    }
+  }, [])
+
   const switchCamera = useCallback(() => {
     const newFacing = facingMode === "user" ? "environment" : "user"
     startCamera(newFacing)
@@ -715,14 +722,8 @@ export function CameraCapture({
   return (
     <div
       ref={containerRef}
-      className="h-full w-full relative bg-black touch-none select-none border-0"
+      className="h-full w-full relative bg-black select-none border-0"
       style={{ userSelect: "none", WebkitUserSelect: "none" }}
-      tabIndex={0}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
-      onKeyDown={handleKeyDown}
     >
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 
@@ -830,6 +831,7 @@ export function CameraCapture({
             <textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
+              onKeyDown={handlePromptKeyDown}
               placeholder="Describe your thumbnail... (e.g., 'green graph going up with dollar signs and text saying I made $20k')"
               className="w-full bg-black/30 backdrop-blur-sm text-white placeholder-white/40 px-4 py-3 rounded-2xl border border-white/20 focus:border-orange-400 focus:outline-none resize-none text-sm"
               rows={2}
@@ -841,11 +843,17 @@ export function CameraCapture({
         {/* Filter Aesthetic Selector */}
         <div className="flex justify-center mt-3">
           <div
-            className="px-6 md:px-8 py-3 relative overflow-hidden bg-black/20 backdrop-blur-sm"
+            className="px-6 md:px-8 py-3 relative overflow-hidden bg-black/20 backdrop-blur-sm touch-none"
             style={{
               borderRadius: "24px",
               width: "min(280px, calc(100vw - 48px))",
             }}
+            tabIndex={0}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onWheel={handleWheel}
+            onKeyDown={handleKeyDown}
           >
             <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
