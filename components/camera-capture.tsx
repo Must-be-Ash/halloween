@@ -920,25 +920,6 @@ export function CameraCapture({
         </div>
       </div>
 
-      {showSwipeHint && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-          <LiquidGlass
-            variant="panel"
-            intensity="medium"
-            rippleEffect={false}
-            flowOnHover={false}
-            stretchOnDrag={false}
-            className="px-4 py-2 animate-pulse"
-            style={{ borderRadius: "16px" }}
-          >
-            <div className="flex items-center space-x-2 text-white/80 font-mono text-sm">
-              <span>←</span>
-              <span className="whitespace-nowrap">{isDesktop ? "scroll & capture" : "swipe & capture"}</span>
-              <span>→</span>
-            </div>
-          </LiquidGlass>
-        </div>
-      )}
     </div>
   )
 }
