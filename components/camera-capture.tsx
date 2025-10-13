@@ -218,6 +218,17 @@ export function CameraCapture({
     onCapture(compressedImageUrl, facingMode)
   }, [onCapture, compressImage, facingMode])
 
+  const handleCaptureClick = useCallback(() => {
+    // If not authenticated, prompt login
+    if (!isWalletConnected) {
+      setIsAuthModalOpen(true)
+      return
+    }
+
+    // If authenticated, proceed with capture
+    capturePhoto()
+  }, [isWalletConnected, capturePhoto])
+
   const switchCamera = useCallback(() => {
     const newFacing = facingMode === "user" ? "environment" : "user"
     startCamera(newFacing)
@@ -747,7 +758,7 @@ export function CameraCapture({
             {!isWalletConnected ? (
               // Not connected: show custom connect button
               <ModernButton onClick={() => setIsAuthModalOpen(true)} size="sm">
-                Connect Wallet
+                Connect
               </ModernButton>
             ) : isCDPWallet ? (
               // CDP wallet: show custom UI with address, top up button, and disconnect
@@ -807,7 +818,7 @@ export function CameraCapture({
             stretchOnDrag={false}
             className={`${isDesktop ? "w-16 h-16" : "w-20 h-20"} flex items-center justify-center cursor-pointer`}
             style={{ borderRadius: "50%" }}
-            onClick={capturePhoto}
+            onClick={handleCaptureClick}
           >
             <CameraIcon className={`${isDesktop ? "w-6 h-6" : "w-8 h-8"} text-white`} />
           </LiquidGlass>
