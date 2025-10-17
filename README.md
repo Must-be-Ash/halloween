@@ -2,7 +2,7 @@
 
 AI-powered camera app with **cryptocurrency micropayments** using the x402 protocol. Capture photos and transform them with 21 unique AI filters for just $0.05 USDC per transformation.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/arashnouruzi-yahoocoms-projects/v0-nano-banana-cam-ik)
+[![Hosted on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://x402-thumbnails.vercel.app/)
 [![x402 Protocol](https://img.shields.io/badge/Powered%20by-x402-blue?style=for-the-badge)](https://www.x402.org/)
 
 ---
@@ -74,16 +74,7 @@ All credit for the core camera app, UI/UX design, and filter concepts goes to Es
 - **Art Deco** - 1920s glamour
 - **Cyberpunk** - Futuristic neon cities
 - **Wild West** - Cowboy frontier
-- **Vintage** - Retro 1950s vibes
-- **Underwater** - Ocean depths
-- **Medieval** - Knights & castles
-- **Neon Tokyo** - Japanese nightlife
-- **Steampunk** - Victorian tech
-- **Spy** - Secret agent
-- **Gothic** - Dark romance
-- **90s** - Retro nostalgia
-- **Disco** - 70s dance fever
-- ...and 9 more unique filters!
+- ...and more
 
 ### x402 Micropayments
 - $0.05 USDC per AI transformation
@@ -405,7 +396,7 @@ If you see errors, check:
 ### Coinbase Developer Platform
 - **Portal**: [portal.cdp.coinbase.com](https://portal.cdp.coinbase.com/)
 - **Facilitator**: Payment verification and settlement service
-- **Faucet**: Get testnet USDC for testing
+
 
 ### Related Technologies
 - **RainbowKit**: [rainbowkit.com](https://www.rainbowkit.com/)
@@ -429,14 +420,6 @@ Contributions are welcome! This fork demonstrates x402 integration patterns that
 
 ---
 
-## 📝 License
-
-This project is a fork of the original Nano Banana Cam by [@EstebanSuarez](https://x.com/estebansuarez).
-
-x402 integration and modifications are provided as-is for educational and demonstration purposes.
-
----
-
 ## 🌟 Showcase
 
 This app demonstrates how to:
@@ -452,5 +435,4 @@ This app demonstrates how to:
 
 ---
 
-**Built with x402 by [@EstebanSuarez](https://x.com/estebansuarez) | Learn more at [x402.org](https://www.x402.org/)**
-# thumbnail-maker
+**A frok of nano banana cam v0 template by by [@EstebanSuarez](https://x.com/estebansuarez) | Learn more about x402 at [x402.org](https://www.x402.org/)**
