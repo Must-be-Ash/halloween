@@ -202,17 +202,17 @@ export function CameraCapture({
     const imageDataUrl = canvas.toDataURL("image/jpeg", 0.9)
     const compressedImageUrl = await compressImage(imageDataUrl)
 
-    console.log("[thumbnail-maker] Photo captured - hiding hint and saving to localStorage")
+    console.log("[x402-halloween] Photo captured - hiding hint and saving to localStorage")
     setShowSwipeHint(false)
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("banana-camera-photo-taken", "true")
         localStorage.setItem("banana_camera_photo_taken", "true") // Alternative key
         sessionStorage.setItem("banana-camera-photo-taken", "true")
-        console.log("[thumbnail-maker] localStorage set - banana-camera-photo-taken: true")
-        console.log("[thumbnail-maker] All storage locations updated")
+        console.log("[x402-halloween] localStorage set - banana-camera-photo-taken: true")
+        console.log("[x402-halloween] All storage locations updated")
       } catch (error) {
-        console.log("[thumbnail-maker] Error saving to localStorage:", error)
+        console.log("[x402-halloween] Error saving to localStorage:", error)
       }
     }
 
@@ -253,17 +253,17 @@ export function CameraCapture({
         if (imageDataUrl) {
           const compressedImageUrl = await compressImage(imageDataUrl)
 
-          console.log("[thumbnail-maker] Image uploaded - hiding hint and saving to localStorage")
+          console.log("[x402-halloween] Image uploaded - hiding hint and saving to localStorage")
           setShowSwipeHint(false)
           if (typeof window !== "undefined") {
             try {
               localStorage.setItem("banana-camera-photo-taken", "true")
               localStorage.setItem("banana_camera_photo_taken", "true") // Alternative key
               sessionStorage.setItem("banana-camera-photo-taken", "true")
-              console.log("[thumbnail-maker] localStorage set - banana-camera-photo-taken: true")
-              console.log("[thumbnail-maker] All storage locations updated")
+              console.log("[x402-halloween] localStorage set - banana-camera-photo-taken: true")
+              console.log("[x402-halloween] All storage locations updated")
             } catch (error) {
-              console.log("[thumbnail-maker] Error saving to localStorage:", error)
+              console.log("[x402-halloween] Error saving to localStorage:", error)
             }
           }
 
@@ -310,7 +310,7 @@ export function CameraCapture({
   }, [])
 
   const autoCenter = useCallback(() => {
-    console.log("[thumbnail-maker] Auto-centering from rotation:", wheelRotationRef.current)
+    console.log("[x402-halloween] Auto-centering from rotation:", wheelRotationRef.current)
 
     const startRotation = wheelRotationRef.current
     const startTime = Date.now()
@@ -332,7 +332,7 @@ export function CameraCapture({
         targetRotationRef.current = 0
         setWheelRotation(0)
         setMomentum(0)
-        console.log("[thumbnail-maker] Auto-center complete")
+        console.log("[x402-halloween] Auto-center complete")
       }
     }
 
@@ -358,7 +358,7 @@ export function CameraCapture({
       }
 
       console.log(
-        "[thumbnail-maker] Momentum filter change from",
+        "[x402-halloween] Momentum filter change from",
         filterIndex,
         "to",
         newIndex,
@@ -390,7 +390,7 @@ export function CameraCapture({
       animationFrameRef.current = requestAnimationFrame(animateMomentum)
     } else {
       isWheelAnimatingRef.current = false
-      console.log("[thumbnail-maker] Momentum stopped - starting auto-center")
+      console.log("[x402-halloween] Momentum stopped - starting auto-center")
       if (autoCenterTimeoutRef.current) {
         clearTimeout(autoCenterTimeoutRef.current)
       }
@@ -429,7 +429,7 @@ export function CameraCapture({
         }
 
         console.log(
-          "[thumbnail-maker] Touch drag filter change from",
+          "[x402-halloween] Touch drag filter change from",
           filterIndex,
           "to",
           newIndex,
@@ -479,7 +479,7 @@ export function CameraCapture({
           newIndex = filterIndex < filters.length - 1 ? filterIndex + 1 : 0
         }
 
-        console.log("[thumbnail-maker] Touch swipe filter change from", filterIndex, "to", newIndex, "deltaX:", deltaX)
+        console.log("[x402-halloween] Touch swipe filter change from", filterIndex, "to", newIndex, "deltaX:", deltaX)
         onFilterSelect(newIndex)
         setShowSwipeHint(false)
 
@@ -492,7 +492,7 @@ export function CameraCapture({
       } else if (Math.abs(deltaX) > 5 && Math.abs(velocityRef.current) > 0.3) {
         animateMomentum()
       } else {
-        console.log("[thumbnail-maker] Touch end - starting auto-center")
+        console.log("[x402-halloween] Touch end - starting auto-center")
         if (autoCenterTimeoutRef.current) {
           clearTimeout(autoCenterTimeoutRef.current)
         }
@@ -529,7 +529,7 @@ export function CameraCapture({
       wheelRotationRef.current += direction * scrollIntensity * 0.15 // Reduced from 0.25
       velocityRef.current = direction * scrollIntensity * 0.05 // Reduced from 0.08
 
-      console.log("[thumbnail-maker] Wheel event, rotation:", wheelRotationRef.current, "direction:", direction)
+      console.log("[x402-halloween] Wheel event, rotation:", wheelRotationRef.current, "direction:", direction)
 
       if (Math.abs(wheelRotationRef.current) > 25) {
         // Reduced from 35
@@ -541,7 +541,7 @@ export function CameraCapture({
           newIndex = filterIndex > 0 ? filterIndex - 1 : filters.length - 1
         }
 
-        console.log("[thumbnail-maker] Wheel filter change from", filterIndex, "to", newIndex)
+        console.log("[x402-halloween] Wheel filter change from", filterIndex, "to", newIndex)
         onFilterSelect(newIndex)
         setShowSwipeHint(false)
 
@@ -676,11 +676,11 @@ export function CameraCapture({
   }, [])
 
   useEffect(() => {
-    console.log("[thumbnail-maker] Camera state - isLoading:", isLoading, "error:", error)
+    console.log("[x402-halloween] Camera state - isLoading:", isLoading, "error:", error)
   }, [isLoading, error])
 
   useEffect(() => {
-    console.log("[thumbnail-maker] showSwipeHint state changed to:", showSwipeHint)
+    console.log("[x402-halloween] showSwipeHint state changed to:", showSwipeHint)
   }, [showSwipeHint])
 
   // Check localStorage for photo taken status (client-side only to avoid hydration errors)
@@ -694,11 +694,11 @@ export function CameraCapture({
         const photoWasTaken = hasEverTakenPhoto === "true" || hasEverTakenPhotoAlt === "true" || sessionFlag === "true"
 
         if (photoWasTaken) {
-          console.log("[thumbnail-maker] Photo was taken before, hiding swipe hint")
+          console.log("[x402-halloween] Photo was taken before, hiding swipe hint")
           setShowSwipeHint(false)
         }
       } catch (error) {
-        console.log("[thumbnail-maker] Error reading localStorage:", error)
+        console.log("[x402-halloween] Error reading localStorage:", error)
       }
     }
   }, [])
@@ -836,7 +836,7 @@ export function CameraCapture({
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
               onKeyDown={handlePromptKeyDown}
-              placeholder="Describe your thumbnail... (e.g., 'green graph going up with dollar signs and text saying I made $20k')"
+              placeholder="Describe your Halloween photo... (e.g., 'green graph going up with dollar signs and text saying I made $20k')"
               className="w-full bg-[#1A0A1A]/50 backdrop-blur-sm text-[#7CFC00] placeholder-[#7CFC00]/40 px-4 py-3 rounded-2xl border border-[#228B22]/30 focus:border-[#9400D3] focus:outline-none resize-none text-sm"
               rows={2}
               style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}

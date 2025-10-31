@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef } from "react"
 
 interface SpookyButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode
+  children?: React.ReactNode
   variant?: "primary" | "secondary" | "ghost"
   size?: "sm" | "md" | "lg" | "xl"
   loading?: boolean

@@ -55,10 +55,10 @@ export function ProcessedImage({
             src={processedImage || "/placeholder.svg"}
             alt="Processed photo with watermark"
             className="w-full h-full object-cover"
-            onLoad={() => console.log("[thumbnail-maker] Processed image rendered successfully")}
+            onLoad={() => console.log("[x402-halloween] Processed image rendered successfully")}
             onError={(e) => {
-              console.log("[thumbnail-maker] Error rendering processed image:", e)
-              console.log("[thumbnail-maker] Image src:", processedImage)
+              console.log("[x402-halloween] Error rendering processed image:", e)
+              console.log("[x402-halloween] Image src:", processedImage)
             }}
           />
         )}

@@ -13,10 +13,10 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
     img.crossOrigin = "anonymous"
 
     img.onload = () => {
-      console.log("[thumbnail-maker] Watermark - Image loaded, dimensions:", img.width, "x", img.height)
+      console.log("[x402-halloween] Watermark - Image loaded, dimensions:", img.width, "x", img.height)
 
       const devicePixelRatio = window.devicePixelRatio || 1
-      console.log("[thumbnail-maker] Watermark - Device pixel ratio:", devicePixelRatio)
+      console.log("[x402-halloween] Watermark - Device pixel ratio:", devicePixelRatio)
 
       // Set canvas size to match image with device pixel ratio for sharp rendering
       canvas.width = img.width * devicePixelRatio
@@ -44,7 +44,7 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       const calculatedSize = Math.min(widthBasedSize, heightBasedSize)
       const fontSize = Math.max(minFontSize, calculatedSize)
 
-      console.log("[thumbnail-maker] Watermark - Font size calculation:")
+      console.log("[x402-halloween] Watermark - Font size calculation:")
       console.log("  - Minimum font size:", minFontSize)
       console.log("  - Width-based size (width/2.5):", widthBasedSize)
       console.log("  - Height-based size (height/2.5):", heightBasedSize)
@@ -61,7 +61,7 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       const x = img.width - padding
       const y = img.height - padding
 
-      console.log("[thumbnail-maker] Watermark - Position calculation:")
+      console.log("[x402-halloween] Watermark - Position calculation:")
       console.log("  - Padding:", padding)
       console.log("  - X position:", x)
       console.log("  - Y position:", y)
@@ -72,19 +72,19 @@ export async function addWatermark(imageUrl: string, isFrontCamera = false): Pro
       ctx.shadowOffsetX = 5
       ctx.shadowOffsetY = 5
 
-      console.log("[thumbnail-maker] Watermark - Drawing text with font:", ctx.font)
+      console.log("[x402-halloween] Watermark - Drawing text with font:", ctx.font)
       ctx.fillText(watermarkText, x, y)
-      console.log("[thumbnail-maker] Watermark - Text drawn successfully")
+      console.log("[x402-halloween] Watermark - Text drawn successfully")
 
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            console.log("[thumbnail-maker] Watermark - Blob created successfully, size:", blob.size, "bytes")
+            console.log("[x402-halloween] Watermark - Blob created successfully, size:", blob.size, "bytes")
             const watermarkedUrl = URL.createObjectURL(blob)
-            console.log("[thumbnail-maker] Watermark - Final watermarked URL created")
+            console.log("[x402-halloween] Watermark - Final watermarked URL created")
             resolve(watermarkedUrl)
           } else {
-            console.error("[thumbnail-maker] Watermark - Failed to create blob")
+            console.error("[x402-halloween] Watermark - Failed to create blob")
             reject(new Error("Failed to create watermarked image"))
           }
         },

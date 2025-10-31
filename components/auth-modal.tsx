@@ -38,7 +38,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         {/* Background Card - Mostly Hidden, Only Bottom Visible */}
         <div className="absolute inset-x-0 top-8 h-[calc(100%+2rem)] bg-gradient-to-br from-[#228B22]/20 to-[#9400D3]/10 backdrop-blur-lg rounded-3xl border border-[#7CFC00]/30 flex items-end justify-center pb-6">
           <p className="text-xs text-[#7CFC00] text-center drop-shadow">
-            Make thumbnails for $0.05 per image
+            Make a Halloween photo for $0.01
           </p>
         </div>
 

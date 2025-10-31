@@ -49,7 +49,7 @@ class RedisRateLimiter {
         }
       }
     } catch (error) {
-      console.error("[thumbnail-maker] Redis rate limiter error:", error)
+      console.error("[x402-halloween] Redis rate limiter error:", error)
       return {
         allowed: true,
         resetTime,

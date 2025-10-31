@@ -2,7 +2,7 @@
 
 AI-powered camera app with **cryptocurrency micropayments** using the x402 protocol. Capture photos and transform them with 21 unique AI filters for just $0.05 USDC per transformation.
 
-[![Hosted on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://x402-thumbnails.vercel.app/)
+[![Hosted on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://x402-halloween.vercel.app/)
 [![x402 Protocol](https://img.shields.io/badge/Powered%20by-x402-blue?style=for-the-badge)](https://www.x402.org/)
 
 ---
@@ -122,8 +122,8 @@ All credit for the core camera app, UI/UX design, and filter concepts goes to Es
 ### 1. Fork & Clone
 
 ```bash
-git clone https://github.com/Must-be-Ash/thumbnail-maker
-cd thumbnail-maker
+git clone https://github.com/Must-be-Ash/halloween
+cd x402-halloween
 npm install
 ```
 

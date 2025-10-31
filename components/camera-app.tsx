@@ -176,12 +176,12 @@ export function CameraApp() {
 
         // Log what we're processing
         if (hasCustomPrompt && !hasFilter) {
-          console.log("[thumbnail-maker] Processing with custom prompt only:", customPrompt.substring(0, 50) + "...")
+          console.log("[x402-halloween] Processing with custom prompt only:", customPrompt.substring(0, 50) + "...")
         } else if (!hasCustomPrompt && hasFilter) {
-          console.log("[thumbnail-maker] Processing with filter only:", selectedFilter.id)
+          console.log("[x402-halloween] Processing with filter only:", selectedFilter.id)
         } else {
-          console.log("[thumbnail-maker] Processing with custom prompt + filter:", selectedFilter.id)
-          console.log("[thumbnail-maker] Custom prompt:", customPrompt.substring(0, 50) + "...")
+          console.log("[x402-halloween] Processing with custom prompt + filter:", selectedFilter.id)
+          console.log("[x402-halloween] Custom prompt:", customPrompt.substring(0, 50) + "...")
         }
 
         // Check if wallet is connected
@@ -198,7 +198,7 @@ export function CameraApp() {
 
         if (isCDPWallet) {
           // Using CDP embedded wallet (email sign-in)
-          console.log("[thumbnail-maker] Using CDP embedded wallet for x402 payment")
+          console.log("[x402-halloween] Using CDP embedded wallet for x402 payment")
 
           try {
             const user = await getCurrentUser()
@@ -216,12 +216,12 @@ export function CameraApp() {
               throw new Error("No CDP wallet account found")
             }
           } catch (cdpError) {
-            console.error("[thumbnail-maker] Failed to setup CDP wallet:", cdpError)
+            console.error("[x402-halloween] Failed to setup CDP wallet:", cdpError)
             throw new Error("Failed to setup embedded wallet for payment")
           }
         } else if (walletClient) {
           // Using external wallet (MetaMask, Coinbase Wallet, etc.)
-          console.log("[thumbnail-maker] Using external wallet for x402 payment")
+          console.log("[x402-halloween] Using external wallet for x402 payment")
           viemClient = walletClient.extend(publicActions)
         } else {
           throw new Error("No wallet client available")
@@ -251,28 +251,45 @@ export function CameraApp() {
 
         const response = await fetchWithPayment("/api/process-image", requestInit)
 
-        console.log("[thumbnail-maker] API response status:", response.status)
+        console.log("[x402-halloween] API response status:", response.status)
 
         if (!response.ok) {
           const errorText = await response.text()
-          console.log("[thumbnail-maker] API error response:", errorText)
-          throw new Error(`Error processing image: ${response.status} ${errorText}`)
+          console.log("[x402-halloween] API error response:", errorText)
+
+          // Try to parse error as JSON for better error messages
+          let errorMessage = `Error processing image: ${response.status}`
+          try {
+            const errorData = JSON.parse(errorText)
+            if (errorData.message) {
+              errorMessage = errorData.message
+            } else if (errorData.details) {
+              errorMessage = `Payment error: ${errorData.details}`
+            } else if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // If not JSON, use the raw text
+            errorMessage = errorText || errorMessage
+          }
+
+          throw new Error(errorMessage)
         }
 
         const data = await response.json()
-        console.log("[thumbnail-maker] API response data:", data)
+        console.log("[x402-halloween] API response data:", data)
 
         if (data.processedImageUrl) {
-          console.log("[thumbnail-maker] Setting processed image URL:", data.processedImageUrl)
+          console.log("[x402-halloween] Setting processed image URL:", data.processedImageUrl)
 
           try {
-            console.log("[thumbnail-maker] Adding watermark to processed image")
+            console.log("[x402-halloween] Adding watermark to processed image")
             const watermarkedImage = await addWatermark(data.processedImageUrl, facingMode === "user")
-            console.log("[thumbnail-maker] Watermark applied successfully")
+            console.log("[x402-halloween] Watermark applied successfully")
             setProcessedImage(watermarkedImage)
             setIsProcessing(false)
           } catch (watermarkError) {
-            console.error("[thumbnail-maker] Error adding watermark:", watermarkError)
+            console.error("[x402-halloween] Error adding watermark:", watermarkError)
             setProcessedImage(data.processedImageUrl)
             setIsProcessing(false)
           }
@@ -280,11 +297,11 @@ export function CameraApp() {
           const img = new Image()
           img.crossOrigin = "anonymous"
           img.onload = () => {
-          console.log("[thumbnail-maker] Processed image loaded successfully")
+          console.log("[x402-halloween] Processed image loaded successfully")
           }
           img.onerror = (error) => {
-            console.log("[thumbnail-maker] Error loading processed image:", error)
-            console.log("[thumbnail-maker] Falling back to original image")
+            console.log("[x402-halloween] Error loading processed image:", error)
+            console.log("[x402-halloween] Falling back to original image")
             addWatermark(imageDataUrl, facingMode === "user")
               .then((watermarkedFallback) => {
                 setProcessedImage(watermarkedFallback)
@@ -297,23 +314,23 @@ export function CameraApp() {
           }
           img.src = data.processedImageUrl
         } else {
-          console.log("[thumbnail-maker] No processed image URL in response, using original with watermark")
+          console.log("[x402-halloween] No processed image URL in response, using original with watermark")
           try {
             const watermarkedImage = await addWatermark(imageDataUrl, facingMode === "user")
             setProcessedImage(watermarkedImage)
           } catch (error) {
-            console.error("[thumbnail-maker] Error adding watermark to fallback:", error)
+            console.error("[x402-halloween] Error adding watermark to fallback:", error)
             setProcessedImage(imageDataUrl)
           }
           setIsProcessing(false)
         }
       } catch (error) {
-        console.error("[thumbnail-maker] Error processing image:", error)
+        console.error("[x402-halloween] Error processing image:", error)
         try {
           const watermarkedImage = await addWatermark(imageDataUrl, facingMode === "user")
           setProcessedImage(watermarkedImage)
         } catch (watermarkError) {
-          console.error("[thumbnail-maker] Error adding watermark to error fallback:", watermarkError)
+          console.error("[x402-halloween] Error adding watermark to error fallback:", watermarkError)
           setProcessedImage(imageDataUrl)
         }
         setIsProcessing(false)

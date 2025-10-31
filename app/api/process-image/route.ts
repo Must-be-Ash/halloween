@@ -4,6 +4,7 @@ import { rateLimiter, getClientIP } from "@/lib/rate-limiter"
 import { facilitator } from "@coinbase/x402"
 import { useFacilitator } from "x402/verify"
 import { createThumbnailPrompt, createCombinedPrompt } from "@/lib/thumbnail-prompt"
+import { retryWithBackoff, isRetryableError } from "@/lib/retry-utils"
 
 // Configure fal client
 fal.config({
@@ -190,11 +191,46 @@ export async function POST(request: NextRequest) {
     console.log("[x402] Settling payment...")
     let settlementResult
     try {
-      settlementResult = await settlePayment(paymentPayload, paymentRequirements)
+      // Retry settlement with exponential backoff (handles transient 502 errors)
+      settlementResult = await retryWithBackoff(
+        async () => {
+          console.log("[x402] Attempting payment settlement...")
+          const result = await settlePayment(paymentPayload, paymentRequirements)
+
+          // Check if settlement was successful
+          if (!result.success) {
+            // Create an error object for retry logic
+            const error = new Error(result.errorReason || "Settlement failed") as any
+            error.settlementResult = result
+
+            // Check if this error is retryable
+            if (isRetryableError(error)) {
+              console.warn("[x402] ⚠️  Retryable settlement error:", result.errorReason)
+              throw error
+            } else {
+              // Non-retryable error, return the result
+              console.error("[x402] ❌ Non-retryable settlement error:", result.errorReason)
+            }
+          }
+
+          return result
+        },
+        {
+          maxRetries: 3,
+          initialDelayMs: 1000,
+          maxDelayMs: 5000,
+          backoffMultiplier: 2,
+          onRetry: (error, attempt, nextDelayMs) => {
+            console.log(`[x402] 🔄 Settlement attempt ${attempt} failed: ${error.message}`)
+            console.log(`[x402] ⏱️  Retrying in ${nextDelayMs}ms...`)
+          }
+        }
+      )
+
       console.log("[x402] Settlement result:", JSON.stringify(settlementResult, null, 2))
 
       if (!settlementResult.success) {
-        console.error("[x402] ❌ Settlement failed:", settlementResult.errorReason)
+        console.error("[x402] ❌ Settlement failed after all retries:", settlementResult.errorReason)
         return NextResponse.json(
           { error: "Payment settlement failed", reason: settlementResult.errorReason },
           { status: 402 }
@@ -206,9 +242,18 @@ export async function POST(request: NextRequest) {
       console.log("[x402] Network:", settlementResult.network)
       console.log("[x402] Payer:", settlementResult.payer)
     } catch (error) {
-      console.error("[x402] Settlement error:", error)
+      console.error("[x402] Settlement error after all retries:", error)
+
+      // Extract more detailed error information
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorDetails = (error as any)?.settlementResult?.errorReason || errorMessage
+
       return NextResponse.json(
-        { error: "Payment settlement failed", details: error instanceof Error ? error.message : String(error) },
+        {
+          error: "Payment settlement failed",
+          details: errorDetails,
+          message: "The payment system is experiencing issues. Please try again in a few moments."
+        },
         { status: 402 }
       )
     }
@@ -253,12 +298,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
       }
       finalPrompt = createCombinedPrompt(customPrompt, config.prompt)
-      console.log("[thumbnail-maker] Processing with combined prompt + filter:", filter)
-      console.log("[thumbnail-maker] Custom content:", customPrompt.substring(0, 80) + "...")
+      console.log("[x402-halloween] Processing with combined prompt + filter:", filter)
+      console.log("[x402-halloween] Custom content:", customPrompt.substring(0, 80) + "...")
     } else if (customPrompt) {
       // Custom prompt only (no filter or filter is "none")
       finalPrompt = createThumbnailPrompt(customPrompt)
-      console.log("[thumbnail-maker] Processing with custom prompt only:", customPrompt.substring(0, 100) + "...")
+      console.log("[x402-halloween] Processing with custom prompt only:", customPrompt.substring(0, 100) + "...")
     } else if (filter && filter !== "none") {
       // Filter only (backward compatible - no custom prompt)
       const config = filterConfigs[filter as keyof typeof filterConfigs]
@@ -266,12 +311,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid filter" }, { status: 400 })
       }
       finalPrompt = config.prompt
-      console.log("[thumbnail-maker] Processing with filter only:", filter)
+      console.log("[x402-halloween] Processing with filter only:", filter)
     } else {
       return NextResponse.json({ error: "Either customPrompt or filter is required" }, { status: 400 })
     }
 
-    console.log("[thumbnail-maker] Using transformation prompt")
+    console.log("[x402-halloween] Using transformation prompt")
 
     const result = await fal.subscribe("fal-ai/nano-banana/edit", {
       input: {
@@ -281,7 +326,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("[thumbnail-maker] Nano Banana transformation result:", result)
+    console.log("[x402-halloween] Nano Banana transformation result:", result)
 
     const processedImageUrl = result.data?.images?.[0]?.url
 
@@ -289,7 +334,7 @@ export async function POST(request: NextRequest) {
       throw new Error("No processed image returned from Nano Banana")
     }
 
-    console.log("[thumbnail-maker] Returning processed image without watermark")
+    console.log("[x402-halloween] Returning processed image without watermark")
 
     // 5. Add payment receipt to response headers (payment already settled before processing)
     const headers: Record<string, string> = {
@@ -311,7 +356,7 @@ export async function POST(request: NextRequest) {
       { headers }
     )
   } catch (error) {
-    console.error("[thumbnail-maker] Error with Nano Banana processing:", error)
+    console.error("[x402-halloween] Error with Nano Banana processing:", error)
     return NextResponse.json(
       {
         error: "Failed to process image with Nano Banana",
