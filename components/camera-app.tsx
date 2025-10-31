@@ -5,6 +5,7 @@ import { useEvmAddress } from "@coinbase/cdp-hooks"
 import { getCurrentUser, toViemAccount } from "@coinbase/cdp-core"
 import { CameraCapture } from "./camera-capture"
 import { ProcessedImage } from "./processed-image"
+import { HalloweenEffects } from "./halloween-effects"
 import { addWatermark } from "../lib/watermark"
 import { createWalletClient, http, publicActions } from "viem"
 import { base } from "viem/chains"
@@ -50,92 +51,92 @@ const filters: Filter[] = [
   },
   {
     id: "art_deco",
-    name: "Art Deco",
-    description: "1920s glamour",
+    name: "Frankenstein",
+    description: "Monster lab",
     prompt:
-      "Transform people with elegant 1920s fashion: men in sharp three-piece suits with bow ties, suspenders, and fedora hats; women in drop-waist beaded dresses, long pearl necklaces, feathered headbands, and T-bar shoes. Add Art Deco environment: geometric patterns on walls, gold and black color schemes, elegant curved lines, stylized sunburst designs, ornate mirrors, crystal chandeliers, marble columns, decorative metalwork, vintage automobiles, jazz age accessories. Apply sophisticated golden lighting with luxurious atmosphere.",
+      "Transform people into Frankenstein's monster: greenish-gray skin tone, neck bolts, stitched scars across face and neck, heavy brow, flat-top hairstyle, tattered Victorian clothing with leather straps, oversized boots, metal bolts and electrodes, raggedy coat. Add laboratory environment: electrical equipment, Tesla coils sparking, old stone laboratory walls, metal operating tables, bubbling beakers with green liquid, lightning rod apparatus, chains hanging, vintage scientific instruments, cobwebs, flickering electrical sparks, mysterious machinery. Apply eerie green and purple electrical lighting with dramatic shadows and stormy atmosphere.",
   },
   {
     id: "cyberpunk",
-    name: "Cyberpunk",
-    description: "Futuristic",
+    name: "Witch",
+    description: "Magical spells",
     prompt:
-      "Transform people into cyberpunk characters: futuristic clothing with LED strips, leather jackets with neon accents, cybernetic implants, glowing tattoos, colored contact lenses, punk hairstyles with neon highlights, tech accessories, augmented reality visors, metallic jewelry. Add cyberpunk environment: neon signs with Japanese text, holographic displays, futuristic buildings, flying cars, digital billboards, chrome pipes, circuit patterns on walls, glowing cables, rain effects. Apply purple and cyan neon lighting with digital glitches.",
+      "Transform people into witches: pointed black hats with buckles, flowing dark robes and cloaks, crooked nose with warts, green face paint, long fingernails, mystical amulets, broomstick accessory, spell book in hand, purple and black layered dresses, striped stockings, buckled boots, occult jewelry, wild dark hair. Add witches' environment: haunted forest with twisted trees, bubbling cauldron with green smoke, spell ingredients scattered around, magic potions in bottles, flying bats, full moon in background, mystical crystals, candles dripping wax, black cats, cobwebs, ancient spell books, magic circles on ground. Apply eerie purple and green mystical lighting with swirling magical mist and enchanted atmosphere.",
   },
   {
     id: "wild_west",
-    name: "Wild West",
-    description: "Cowboy frontier",
+    name: "Dracula",
+    description: "Vampire lord",
     prompt:
-      "Transform people into cowboys and frontier folk: men in cowboy hats, leather chaps, boots with spurs, bandanas, sheriff badges, gun holsters; women in prairie dresses, bonnets, leather boots, fringed jackets. Add wild west environment: desert cacti, tumbleweeds, old wooden saloons, horse-drawn wagons, wanted posters on walls, oil lamps, wooden barrels, desert mountains in background, vultures circling, dust storms, rustic fences. Apply warm desert tones with dramatic sunset lighting.",
+      "Transform people into vampires: pale white skin, sharp fangs visible, slicked-back dark hair, dramatic high-collared black cape with red lining, Victorian formal attire, white ruffled shirt, black vest and coat, blood-red accents, dark eyeshadow around eyes, widow's peak hairstyle, ornate rings, medallion necklace, elegant leather gloves. Add vampire castle environment: gothic castle interior, ornate coffin, stone walls with torches, cobwebs in corners, candelabras with dripping candles, red velvet curtains, ancient portraits, stone gargoyles, moonlight streaming through arched windows, bats flying, misty atmosphere, medieval chandeliers, crimson roses. Apply dramatic moonlight with deep red and purple shadows and mysterious nocturnal atmosphere.",
   },
   {
     id: "vintage",
-    name: "Vintage",
-    description: "Retro vibes",
+    name: "Werewolf",
+    description: "Full moon beast",
     prompt:
-      "Transform people with vintage 1950s style: men in high-waisted trousers, suspenders, bow ties, rolled sleeves, pompadour hairstyles; women in circle skirts, petticoats, cardigans, victory rolls, red lipstick, cat-eye glasses. Add vintage environment: classic diners, jukeboxes, vintage cars, checkered floors, neon signs, milkshake bars, drive-in theaters, retro furniture. Apply warm sepia tones with soft vintage lighting.",
+      "Transform people into werewolves: fur covering face and hands, pointed wolf ears, elongated snout with sharp teeth, yellow glowing eyes, claw-like fingernails, wild unkempt hair, torn and tattered clothing, muscular build, fangs visible, hairy arms and chest, animalistic features, rugged leather vest, ripped pants, bare feet with claws. Add forest environment: dark woods with twisted trees, full moon glowing bright, fog rolling through ground, ancient oak trees, scattered bones, muddy forest floor, howling wolves in distance, abandoned cabin, claw marks on trees, mysterious shadows, fallen leaves, rocky terrain. Apply silvery moonlight with blue-tinted shadows and wild nocturnal atmosphere.",
   },
   {
     id: "underwater",
-    name: "Underwater",
-    description: "Ocean depths",
+    name: "Zombie",
+    description: "Undead horror",
     prompt:
-      "Transform people into underwater explorers: diving suits, oxygen masks, flippers, underwater gear, coral accessories, seaweed hair decorations, pearl jewelry, nautical clothing. Add underwater environment: colorful coral reefs, tropical fish swimming around, sea anemones, underwater caves, sunlight filtering through water, bubbles floating up, shipwrecks, treasure chests, dolphins, sea turtles. Apply blue-green aquatic lighting with water ripple effects.",
+      "Transform people into zombies: pale gray-green decaying skin, dark circles under eyes, blood stains on face and clothes, torn and dirty clothing, disheveled hair, exposed wounds and cuts, rotting flesh appearance, missing chunks of skin, blank stare, crooked teeth, muddy hands, tattered pants and shirt, bare feet, skeletal features showing through. Add graveyard environment: old tombstones tilted and cracked, fog creeping along ground, dead trees with bare branches, freshly dug graves, zombie hands reaching from ground, broken cemetery gates, ravens perched on monuments, scattered bones, overgrown weeds, full moon behind clouds, eerie mist, abandoned mausoleums. Apply sickly green and gray lighting with foggy haze and post-apocalyptic atmosphere.",
   },
   {
     id: "medieval",
-    name: "Medieval",
-    description: "Knights & castles",
+    name: "Ghost",
+    description: "Ethereal spirit",
     prompt:
-      "Transform people into medieval characters: knights in armor with helmets and shields, princesses in flowing gowns with crowns, peasants in simple tunics, monks in robes, blacksmiths with leather aprons. Add medieval environment: stone castles, wooden bridges, torches on walls, banners with heraldic symbols, cobblestone paths, medieval weapons, horse stables, market stalls, gothic architecture. Apply warm candlelight with dramatic shadows.",
+      "Transform people into ghosts: translucent pale white appearance, semi-transparent floating effect, flowing white sheets or burial shrouds, hollow dark eyes, ethereal glow, Victorian-era clothing faded and tattered, chains dragging behind, wispy hair flowing, spectral hands, misty aura surrounding body, vintage nightgown or old suit, barefoot hovering. Add haunted mansion environment: abandoned Victorian house interior, dusty furniture covered in white sheets, creaky wooden floors, cobwebs everywhere, antique mirrors reflecting nothing, flickering candles, old portraits on walls, grandfather clock stopped at midnight, spiral staircase, broken chandeliers, misty corners, peeling wallpaper, dusty books. Apply cold blue-white ghostly lighting with ethereal glow and supernatural atmosphere.",
   },
   {
     id: "neon_tokyo",
-    name: "Neon Tokyo",
-    description: "Japanese nightlife",
+    name: "Mummy",
+    description: "Ancient curse",
     prompt:
-      "Transform people with Tokyo street fashion: colorful hair, anime-inspired outfits, LED accessories, kawaii elements, street wear, platform shoes, face masks with designs, tech gadgets. Add neon Tokyo environment: Japanese street signs, vending machines, cherry blossoms, paper lanterns, anime billboards, crowded streets, bullet trains, traditional temples mixed with modern buildings, ramen shops, arcade games. Apply vibrant neon pink and blue lighting.",
+      "Transform people into mummies: wrapped in aged beige bandages covering entire body, bandages loosely hanging and unraveling, visible gaps showing dried skin beneath, hollow eyes peering through wrappings, ancient Egyptian jewelry and amulets, tarnished gold collar and bracelets, weathered cloth strips, dusty appearance, cracked dried skin visible in openings, hieroglyphic symbols on bandages, ceremonial headdress. Add Egyptian tomb environment: ancient pyramid interior, stone sarcophagus opened, hieroglyphics carved on walls, golden treasures scattered, dusty sandstone blocks, flickering torches, scarab beetles crawling, canopic jars, ancient scrolls, sand drifting in, mysterious shadows, crumbling pillars, treasure chambers. Apply warm amber and golden torch lighting with dusty haze and ancient cursed atmosphere.",
   },
   {
     id: "steampunk",
-    name: "Steampunk",
-    description: "Victorian tech",
+    name: "Skeleton",
+    description: "Bones revealed",
     prompt:
-      "Transform people into steampunk characters: brass goggles, leather corsets, top hats with gears, mechanical arm pieces, pocket watches, steam-powered accessories, Victorian clothing with industrial elements, copper jewelry. Add steampunk environment: brass pipes, steam engines, clockwork mechanisms, airships, industrial machinery, copper and bronze metals, vintage laboratories, mechanical contraptions, steam clouds. Apply warm brass lighting with industrial atmosphere.",
+      "Transform people into skeletons: white bone face paint showing skull structure, black around eyes and nose, visible teeth and jawbone, skeletal hands with bone details, rib cage painted on torso, spine visible on back, joint bones on elbows and knees, black body suit underneath with white bone overlay, skull mask or face paint, bony fingers, tattered black cloak, top hat or bone accessories. Add crypt environment: underground catacombs, skulls stacked on walls, ancient bones scattered on floor, stone archways, cobwebs hanging, rusty gates, bone piles, candlelit alcoves, medieval crypts, dusty coffins, underground passages, dripping water, moss-covered stones. Apply cold gray and blue bone-white lighting with shadowy underground atmosphere.",
   },
   {
     id: "spy",
-    name: "Spy",
-    description: "Secret agent",
+    name: "Black Cat",
+    description: "Feline familiar",
     prompt:
-      "Transform people into sophisticated secret agents: men in tailored black suits, bow ties, cufflinks, sleek sunglasses, leather gloves, spy watches; women in elegant cocktail dresses, pearl earrings, red lipstick, stylish trench coats, high heels. Add spy environment: casino interiors, luxury hotels, city rooftops at night, vintage sports cars, briefcases, surveillance equipment, martini glasses, poker tables, neon city lights, shadowy alleyways, international landmarks. Apply dramatic film noir lighting with high contrast shadows and mysterious atmosphere.",
+      "Transform people into black cat creatures: sleek black cat ears headband, painted black nose and whiskers on face, dramatic cat eye makeup, black face paint or mask, sharp drawn-on fangs, black furry tail, all-black outfit with sleek bodysuit or dress, black gloves with painted claws, cat collar with bell, furry black boots or paws, feline grace pose, yellow or green glowing contact lenses, black velvet clothing. Add mysterious alley environment: moonlit night scene, brick walls with ivy, witch's familiar setting, mysterious fog, full moon overhead, rooftop silhouettes, shadowy corners, autumn leaves scattered, iron fence with ornate design, vintage lamp posts, cobblestone streets, mysterious doorways, arched windows. Apply dramatic moonlight with deep blue and purple shadows and mystical nocturnal atmosphere.",
   },
   {
     id: "gothic",
-    name: "Gothic",
-    description: "Dark romance",
+    name: "Haunted Doll",
+    description: "Possessed porcelain",
     prompt:
-      "Transform people into gothic characters: men in black Victorian coats, ruffled shirts, dark eyeliner, silver jewelry, leather boots; women in corsets, flowing black dresses, lace gloves, dark makeup, chokers, dramatic eye shadow. Add gothic environment: ancient cathedrals, stone gargoyles, wrought iron gates, candlelit chambers, stained glass windows, fog-covered graveyards, medieval architecture, ravens, thorny roses, ornate mirrors, velvet curtains. Apply moody purple and blue lighting with dramatic shadows and mysterious ambiance.",
+      "Transform people into creepy dolls: porcelain-white face paint, exaggerated round painted cheeks in pink circles, oversized painted-on eyes with long lashes, small pursed red lips, cracked face makeup showing broken porcelain, Victorian-style dress with lace and ribbons, frilly collar and sleeves, mary jane shoes with white socks, ringlet curls or pigtails with large bows, stitched mouth appearance, button eyes option, vintage doll clothing, frozen doll-like expression. Add dollhouse environment: oversized vintage dollhouse room, giant antique toys scattered around, rocking horse in corner, old teddy bears with missing eyes, vintage toy chest, floral wallpaper peeling, child's room from past era, porcelain dolls on shelves watching, broken music box, dusty playroom, cobwebs on toy furniture, cracked mirrors. Apply dim dusty lighting with eerie pink and blue tones and unsettling childhood atmosphere.",
   },
   {
     id: "90s",
-    name: "90s",
-    description: "Retro nostalgia",
+    name: "Pumpkin King",
+    description: "Jack's realm",
     prompt:
-      "Transform people with authentic 90s fashion: men in baggy jeans, flannel shirts, backwards baseball caps, sneakers, chain wallets; women in crop tops, high-waisted jeans, chokers, platform shoes, butterfly clips, denim jackets. Add 90s environment: arcade games, neon mall aesthetics, boom boxes, cassette tapes, VHS stores, roller rinks, geometric patterns, bright colors, old computers, pagers, CD players, grunge concert posters. Apply vibrant neon lighting with retro color schemes and nostalgic atmosphere.",
+      "Transform people into pumpkin creatures: orange pumpkin head with carved jack-o'-lantern face, glowing triangular eyes, wide carved smile with visible teeth, stem on top of head like hat, orange and black striped clothing, skeletal pinstripe suit, bat bow tie, long spindly fingers, autumn leaves as accessories, pumpkin patch king crown, tattered elegant coat, vine decorations wrapped around arms, gothic gentleman style with pumpkin twist. Add Halloween Town environment: twisted bare trees with curled branches, rolling pumpkin patch hills, spiral mountain in background, crooked houses with steep roofs, jack-o'-lanterns everywhere glowing, autumn leaves swirling, full harvest moon, graveyard fence, scarecrows, gothic town square, stone fountain, wrought iron gates, orange and purple sky. Apply warm orange and purple Halloween lighting with magical autumn glow and whimsical spooky atmosphere.",
   },
   {
     id: "disco",
-    name: "Disco",
-    description: "70s dance fever",
+    name: "Creepy Clown",
+    description: "Sinister circus",
     prompt:
-      "Transform people into disco dancers: men in wide-collar shirts, bell-bottom pants, gold chains, afro hairstyles, platform shoes; women in sequined dresses, feathered hair, bold makeup, metallic fabrics, go-go boots, large hoop earrings. Add disco environment: mirror balls, colorful dance floors, neon lights, vinyl records, DJ booths, retro furniture, lava lamps, psychedelic patterns, disco balls reflecting light, dance platforms, vintage microphones. Apply dynamic multicolored lighting with sparkles, reflections, and groovy dance floor atmosphere.",
+      "Transform people into scary clowns: exaggerated white face paint with cracked texture, oversized red nose, sinister smile painted wider than natural mouth with sharp teeth, dramatic black eye makeup dripping down, colorful wild wig in red or rainbow, ruffled collar in bright colors, polka dot or striped costume, oversized shoes, tattered circus outfit, face paint running and smeared, evil grin expression, theatrical makeup, suspenders, bow tie, vintage circus performer clothes with dark twist. Add creepy carnival environment: abandoned circus tent with holes, rusty carnival rides, broken carousel horses, faded circus posters peeling, dim carnival lights flickering, old popcorn stands, warped funhouse mirrors, scattered balloons deflating, fog rolling across ground, dilapidated ticket booth, eerie circus music box, striped tent fabric torn, cobwebs on equipment. Apply harsh red and yellow spotlight lighting with deep shadows and unsettling carnival atmosphere.",
   },
 ]
 
 export function CameraApp() {
-  const [selectedFilterIndex, setSelectedFilterIndex] = useState(0)
+  const [selectedFilterIndex, setSelectedFilterIndex] = useState(1)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -373,9 +374,12 @@ export function CameraApp() {
 
   return (
     <div
-      className="h-dvh w-screen bg-black overflow-hidden fixed inset-0 touch-none select-none"
+      className="h-dvh w-screen bg-[#0A0A0A] overflow-hidden fixed inset-0 touch-none select-none"
       style={{ userSelect: "none", WebkitUserSelect: "none" }}
     >
+      <div className="absolute inset-0 z-0">
+        <HalloweenEffects />
+      </div>
       {!capturedImage ? (
         <CameraCapture
           onCapture={handleCapture}

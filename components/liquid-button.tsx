@@ -36,15 +36,15 @@ export function LiquidButton({
   const getVariantStyles = () => {
     switch (variant) {
       case "primary":
-        return "text-white bg-gradient-to-r from-blue-500/20 to-purple-600/20 border-blue-400/30 hover:from-blue-400/30 hover:to-purple-500/30"
+        return "text-white border-[#7CFC00]/40 hover:border-[#7CFC00]/60 [background:linear-gradient(135deg,rgba(124,252,0,0.2)_0%,rgba(148,0,211,0.15)_100%)] hover:[background:linear-gradient(135deg,rgba(124,252,0,0.3)_0%,rgba(148,0,211,0.2)_100%)]"
       case "secondary":
-        return "text-gray-100 bg-white/10 border-white/20 hover:bg-white/15"
+        return "text-[#7CFC00] border-[#228B22]/30 hover:border-[#228B22]/50 [background:rgba(34,139,34,0.1)] hover:[background:rgba(34,139,34,0.15)]"
       case "ghost":
-        return "text-white bg-transparent border-white/10 hover:bg-white/5"
+        return "text-white border-[#228B22]/20 hover:border-[#228B22]/30 [background:transparent] hover:[background:rgba(34,139,34,0.05)]"
       case "danger":
-        return "text-white bg-gradient-to-r from-red-500/20 to-pink-600/20 border-red-400/30 hover:from-red-400/30 hover:to-pink-500/30"
+        return "text-white border-[#FF4500]/40 hover:border-[#FF4500]/60 [background:rgba(255,69,0,0.2)] hover:[background:rgba(255,69,0,0.3)]"
       default:
-        return "text-white bg-white/10 border-white/20"
+        return "text-white border-[#228B22]/30 [background:rgba(34,139,34,0.1)]"
     }
   }
 
@@ -70,7 +70,7 @@ export function LiquidButton({
 
   const buttonContent = (
     <div className="flex items-center justify-center gap-2">
-      {loading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+      {loading && <div className="w-4 h-4 border-2 border-[#7CFC00]/30 border-t-[#7CFC00] rounded-full animate-spin" />}
       {icon && iconPosition === "left" && !loading && <span className="flex-shrink-0">{icon}</span>}
       <span className={loading ? "opacity-70" : ""}>{children}</span>
       {icon && iconPosition === "right" && !loading && <span className="flex-shrink-0">{icon}</span>}

@@ -9,6 +9,7 @@ import { AuthModal } from "./auth-modal"
 import { LiquidGlass } from "./liquid-glass"
 import { FundWalletButton } from "./fund-wallet-button"
 import { ModernButton } from "./ui/modern-button"
+import { SpookyButton } from "./spooky-button"
 import type { Filter } from "./camera-app"
 
 const CameraIcon = ({ className }: { className?: string }) => (
@@ -704,16 +705,16 @@ export function CameraCapture({
 
   if (error) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-black text-white">
+      <div className="h-full w-full flex items-center justify-center bg-[#0A0A0A] text-[#7CFC00]">
         <div className="text-center space-y-4 px-8">
-          <CameraIcon className="w-16 h-16 mx-auto text-white/60" />
+          <CameraIcon className="w-16 h-16 mx-auto text-[#7CFC00]/60" />
           <div>
             <h3 className="text-xl font-medium">Camera Error</h3>
-            <p className="text-white/60 mt-2">{error}</p>
+            <p className="text-[#7CFC00]/60 mt-2">{error}</p>
           </div>
-          <LiquidGlass variant="button" intensity="medium" onClick={() => startCamera()} className="text-white">
-            Retry
-          </LiquidGlass>
+          <SpookyButton variant="primary" onClick={() => startCamera()}>
+            RETRY
+          </SpookyButton>
         </div>
       </div>
     )
@@ -722,16 +723,16 @@ export function CameraCapture({
   return (
     <div
       ref={containerRef}
-      className="h-full w-full relative bg-black select-none border-0"
+      className="h-full w-full relative bg-[#0A0A0A] select-none border-0"
       style={{ userSelect: "none", WebkitUserSelect: "none" }}
     >
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A] z-10">
           <div className="text-center space-y-4">
-            <div className="w-8 h-8 mx-auto border-2 border-white border-t-transparent rounded-full animate-spin" />
-            <p className="text-white/60">Starting camera...</p>
+            <div className="w-8 h-8 mx-auto border-2 border-[#7CFC00] border-t-transparent rounded-full animate-spin" />
+            <p className="text-[#7CFC00]/60">Starting camera...</p>
           </div>
         </div>
       )}
@@ -758,22 +759,22 @@ export function CameraCapture({
             {/* Auth/Wallet Section - Different UI based on wallet type */}
             {!isWalletConnected ? (
               // Not connected: show custom connect button
-              <ModernButton onClick={() => setIsAuthModalOpen(true)} size="sm">
-                Connect
-              </ModernButton>
+              <SpookyButton onClick={() => setIsAuthModalOpen(true)} variant="primary" size="sm">
+                CONNECT
+              </SpookyButton>
             ) : isCDPWallet ? (
               // CDP wallet: show custom UI with address, top up button, and disconnect
               <>
-                <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
+                <div className="flex items-center space-x-2 bg-[#228B22]/20 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#7CFC00]/30">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-white text-sm font-mono">
+                    <div className="w-2 h-2 rounded-full bg-[#7CFC00] animate-pulse" />
+                    <span className="text-[#7CFC00] text-sm font-mono">
                       {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : "Connected"}
                     </span>
                   </div>
                   <button
                     onClick={() => disconnect()}
-                    className="text-white/60 hover:text-white text-xs transition-colors"
+                    className="text-[#7CFC00]/60 hover:text-[#7CFC00] text-xs transition-colors"
                     title="Disconnect"
                   >
                     ✕
@@ -795,13 +796,21 @@ export function CameraCapture({
               </div>
             )}
 
-            <ModernButton onClick={triggerImageUpload} className="rounded-full w-10 h-10 p-0 flex items-center justify-center" size="custom">
-              <UploadIcon className="w-4 h-4" />
-            </ModernButton>
+            <SpookyButton
+              onClick={triggerImageUpload}
+              variant="ghost"
+              size="sm"
+              icon={<UploadIcon className="w-4 h-4" />}
+              className="rounded-full w-10 h-10 p-0"
+            />
 
-            <ModernButton onClick={switchCamera} className="rounded-full w-10 h-10 p-0 flex items-center justify-center" size="custom">
-              <SwitchCameraIcon className="w-5 h-5" />
-            </ModernButton>
+            <SpookyButton
+              onClick={switchCamera}
+              variant="ghost"
+              size="sm"
+              icon={<SwitchCameraIcon className="w-5 h-5" />}
+              className="rounded-full w-10 h-10 p-0"
+            />
           </div>
         </div>
       </div>
@@ -811,18 +820,13 @@ export function CameraCapture({
 
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 pb-12 md:pb-8 bg-gradient-to-t from-black/50 to-transparent pointer-events-auto z-20">
         <div className="flex justify-center items-center">
-          <LiquidGlass
-            variant="panel"
-            intensity="medium"
-            rippleEffect={false}
-            flowOnHover={false}
-            stretchOnDrag={false}
-            className={`${isDesktop ? "w-16 h-16" : "w-20 h-20"} flex items-center justify-center cursor-pointer`}
-            style={{ borderRadius: "50%" }}
+          <SpookyButton
             onClick={handleCaptureClick}
-          >
-            <CameraIcon className={`${isDesktop ? "w-6 h-6" : "w-8 h-8"} text-white`} />
-          </LiquidGlass>
+            variant="primary"
+            size={isDesktop ? "md" : "lg"}
+            icon={<CameraIcon className={`${isDesktop ? "w-6 h-6" : "w-8 h-8"}`} />}
+            className={`${isDesktop ? "w-16 h-16" : "w-20 h-20"} rounded-full p-0`}
+          />
         </div>
 
         {/* Custom Prompt Input - Always Visible */}
@@ -833,7 +837,7 @@ export function CameraCapture({
               onChange={(e) => setCustomPrompt(e.target.value)}
               onKeyDown={handlePromptKeyDown}
               placeholder="Describe your thumbnail... (e.g., 'green graph going up with dollar signs and text saying I made $20k')"
-              className="w-full bg-black/30 backdrop-blur-sm text-white placeholder-white/40 px-4 py-3 rounded-2xl border border-white/20 focus:border-orange-400 focus:outline-none resize-none text-sm"
+              className="w-full bg-[#1A0A1A]/50 backdrop-blur-sm text-[#7CFC00] placeholder-[#7CFC00]/40 px-4 py-3 rounded-2xl border border-[#228B22]/30 focus:border-[#9400D3] focus:outline-none resize-none text-sm"
               rows={2}
               style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
             />
@@ -843,7 +847,7 @@ export function CameraCapture({
         {/* Filter Aesthetic Selector */}
         <div className="flex justify-center mt-3">
           <div
-            className="px-6 md:px-8 py-3 relative overflow-hidden bg-black/20 backdrop-blur-sm touch-none"
+            className="px-6 md:px-8 py-3 relative overflow-hidden bg-[#0F0F0F]/40 backdrop-blur-sm touch-none"
             style={{
               borderRadius: "24px",
               width: "min(280px, calc(100vw - 48px))",
@@ -892,8 +896,8 @@ export function CameraCapture({
                         onClick={() => handleFilterChange(index)}
                         className={`font-mono text-sm font-medium flex-shrink-0 text-center transition-all duration-300 whitespace-nowrap relative px-4 py-2 rounded-full ${
                           isCurrent
-                            ? "text-yellow-400 bg-white/10 backdrop-blur-sm border border-white/20"
-                            : "text-white/60 hover:text-white/80"
+                            ? "text-[#9400D3] bg-[#228B22]/20 backdrop-blur-sm border border-[#7CFC00]/30"
+                            : "text-[#7CFC00]/60 hover:text-[#7CFC00]/80"
                         }`}
                         style={{
                           transition: isTransitioning
@@ -912,7 +916,7 @@ export function CameraCapture({
         </div>
 
         <div className="flex justify-center mt-2">
-          <div className="text-center text-xs text-white/50 max-w-xs">
+          <div className="text-center text-xs text-[#7CFC00]/50 max-w-xs">
             {selectedFilter.id === "none"
               ? "Custom prompt only - AI will create cinematic styling"
               : `Custom prompt + ${selectedFilter.name} aesthetic`}

@@ -1,9 +1,15 @@
 import type { Metadata } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
+import { Creepster } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Providers from '@/components/providers'
 import './globals.css'
+
+const creepster = Creepster({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-creepster',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Nano Banana Cam x402',
@@ -54,7 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className={`${creepster.variable} font-sans`}>
         <Providers>
           {children}
         </Providers>

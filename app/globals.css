@@ -4,80 +4,80 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated theme for camera app with vibrant colors */
-  --background: oklch(0.08 0.02 240);
-  --foreground: oklch(0.98 0.01 240);
-  --card: oklch(0.12 0.02 240);
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.12 0.02 240);
-  --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.65 0.25 280);
-  --primary-foreground: oklch(0.98 0.01 240);
-  --secondary: oklch(0.18 0.03 240);
-  --secondary-foreground: oklch(0.95 0.01 240);
-  --muted: oklch(0.15 0.02 240);
-  --muted-foreground: oklch(0.65 0.02 240);
-  --accent: oklch(0.55 0.35 320);
-  --accent-foreground: oklch(0.98 0.01 240);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0.01 240);
-  --border: oklch(0.22 0.03 240);
-  --input: oklch(0.18 0.03 240);
-  --ring: oklch(0.65 0.25 280);
-  --chart-1: oklch(0.65 0.25 280);
-  --chart-2: oklch(0.55 0.35 320);
-  --chart-3: oklch(0.45 0.25 200);
-  --chart-4: oklch(0.75 0.15 60);
-  --chart-5: oklch(0.85 0.25 40);
+  /* Halloween theme - Spooky green slimes and purple accents */
+  --background: #0A0A0A;
+  --foreground: #7CFC00;
+  --card: #1A0A1A;
+  --card-foreground: #32CD32;
+  --popover: #1A0A1A;
+  --popover-foreground: #7CFC00;
+  --primary: #7CFC00;
+  --primary-foreground: #0A0A0A;
+  --secondary: #228B22;
+  --secondary-foreground: #7CFC00;
+  --muted: #0F0F0F;
+  --muted-foreground: #228B22;
+  --accent: #9400D3;
+  --accent-foreground: #7CFC00;
+  --destructive: #FF4500;
+  --destructive-foreground: #0A0A0A;
+  --border: #228B22;
+  --input: #1A0A1A;
+  --ring: #7CFC00;
+  --chart-1: #7CFC00;
+  --chart-2: #32CD32;
+  --chart-3: #9400D3;
+  --chart-4: #800080;
+  --chart-5: #228B22;
   --radius: 1rem;
-  --sidebar: oklch(0.12 0.02 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.65 0.25 280);
-  --sidebar-primary-foreground: oklch(0.98 0.01 240);
-  --sidebar-accent: oklch(0.18 0.03 240);
-  --sidebar-accent-foreground: oklch(0.95 0.01 240);
-  --sidebar-border: oklch(0.22 0.03 240);
-  --sidebar-ring: oklch(0.65 0.25 280);
+  --sidebar: #0F0F0F;
+  --sidebar-foreground: #7CFC00;
+  --sidebar-primary: #7CFC00;
+  --sidebar-primary-foreground: #0A0A0A;
+  --sidebar-accent: #228B22;
+  --sidebar-accent-foreground: #7CFC00;
+  --sidebar-border: #228B22;
+  --sidebar-ring: #7CFC00;
 }
 
 .dark {
-  --background: oklch(0.08 0.02 240);
-  --foreground: oklch(0.98 0.01 240);
-  --card: oklch(0.12 0.02 240);
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.12 0.02 240);
-  --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.65 0.25 280);
-  --primary-foreground: oklch(0.98 0.01 240);
-  --secondary: oklch(0.18 0.03 240);
-  --secondary-foreground: oklch(0.95 0.01 240);
-  --muted: oklch(0.15 0.02 240);
-  --muted-foreground: oklch(0.65 0.02 240);
-  --accent: oklch(0.55 0.35 320);
-  --accent-foreground: oklch(0.98 0.01 240);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0.01 240);
-  --border: oklch(0.22 0.03 240);
-  --input: oklch(0.18 0.03 240);
-  --ring: oklch(0.65 0.25 280);
-  --chart-1: oklch(0.65 0.25 280);
-  --chart-2: oklch(0.55 0.35 320);
-  --chart-3: oklch(0.45 0.25 200);
-  --chart-4: oklch(0.75 0.15 60);
-  --chart-5: oklch(0.85 0.25 40);
-  --sidebar: oklch(0.12 0.02 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.65 0.25 280);
-  --sidebar-primary-foreground: oklch(0.98 0.01 240);
-  --sidebar-accent: oklch(0.18 0.03 240);
-  --sidebar-accent-foreground: oklch(0.95 0.01 240);
-  --sidebar-border: oklch(0.22 0.03 240);
-  --sidebar-ring: oklch(0.65 0.25 280);
+  --background: #0A0A0A;
+  --foreground: #7CFC00;
+  --card: #1A0A1A;
+  --card-foreground: #32CD32;
+  --popover: #1A0A1A;
+  --popover-foreground: #7CFC00;
+  --primary: #7CFC00;
+  --primary-foreground: #0A0A0A;
+  --secondary: #228B22;
+  --secondary-foreground: #7CFC00;
+  --muted: #0F0F0F;
+  --muted-foreground: #228B22;
+  --accent: #9400D3;
+  --accent-foreground: #7CFC00;
+  --destructive: #FF4500;
+  --destructive-foreground: #0A0A0A;
+  --border: #228B22;
+  --input: #1A0A1A;
+  --ring: #7CFC00;
+  --chart-1: #7CFC00;
+  --chart-2: #32CD32;
+  --chart-3: #9400D3;
+  --chart-4: #800080;
+  --chart-5: #228B22;
+  --sidebar: #0F0F0F;
+  --sidebar-foreground: #7CFC00;
+  --sidebar-primary: #7CFC00;
+  --sidebar-primary-foreground: #0A0A0A;
+  --sidebar-accent: #228B22;
+  --sidebar-accent-foreground: #7CFC00;
+  --sidebar-border: #228B22;
+  --sidebar-ring: #7CFC00;
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-creepster);
+  --font-mono: var(--font-creepster);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -324,5 +324,164 @@
   .modern-auth-button *:active {
     background: transparent !important;
     box-shadow: none !important;
+  }
+
+  /* Halloween smoke effects */
+  @keyframes smokeFloat {
+    0% {
+      transform: translateY(0) translateX(0) scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translateY(-50px) translateX(20px) scale(1.2);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-100px) translateX(40px) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  @keyframes smokeFloat2 {
+    0% {
+      transform: translateY(0) translateX(0) scale(1);
+      opacity: 0.25;
+    }
+    50% {
+      transform: translateY(-60px) translateX(-30px) scale(1.3);
+      opacity: 0.4;
+    }
+    100% {
+      transform: translateY(-120px) translateX(-60px) scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slimeBubble {
+    0% {
+      transform: translateY(100vh) translateX(0) scale(0);
+      opacity: 0.8;
+    }
+    30% {
+      transform: translateY(70vh) translateX(30px) scale(1);
+      opacity: 0.9;
+    }
+    60% {
+      transform: translateY(40vh) translateX(-20px) scale(1.2);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(-20vh) translateX(50px) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slimeBubble2 {
+    0% {
+      transform: translateY(100vh) translateX(0) scale(0);
+      opacity: 0.7;
+    }
+    30% {
+      transform: translateY(75vh) translateX(-40px) scale(0.9);
+      opacity: 0.85;
+    }
+    60% {
+      transform: translateY(45vh) translateX(25px) scale(1.1);
+      opacity: 0.65;
+    }
+    100% {
+      transform: translateY(-15vh) translateX(-60px) scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes purpleGlow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(148, 0, 211, 0.3), 0 0 40px rgba(148, 0, 211, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(148, 0, 211, 0.5), 0 0 60px rgba(148, 0, 211, 0.3);
+    }
+  }
+
+  @keyframes greenGlow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(124, 252, 0, 0.3), 0 0 40px rgba(124, 252, 0, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(124, 252, 0, 0.5), 0 0 60px rgba(124, 252, 0, 0.3);
+    }
+  }
+
+  /* Halloween background effects */
+  .halloween-smoke {
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(148, 0, 211, 0.15) 0%, rgba(124, 252, 0, 0.1) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: smokeFloat 8s ease-out infinite;
+    filter: blur(30px);
+  }
+
+  .halloween-smoke-2 {
+    position: fixed;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(124, 252, 0, 0.12) 0%, rgba(148, 0, 211, 0.08) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: smokeFloat2 10s ease-out infinite;
+    filter: blur(35px);
+  }
+
+  .halloween-slime {
+    position: fixed;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(124, 252, 0, 0.4) 0%, rgba(50, 205, 50, 0.3) 50%, transparent 80%);
+    border-radius: 45% 55% 40% 60%;
+    pointer-events: none;
+    animation: slimeBubble 12s ease-in-out infinite;
+    filter: blur(20px);
+  }
+
+  .halloween-slime-2 {
+    position: fixed;
+    width: 130px;
+    height: 130px;
+    background: radial-gradient(circle, rgba(34, 139, 34, 0.35) 0%, rgba(124, 252, 0, 0.25) 50%, transparent 80%);
+    border-radius: 50% 40% 60% 45%;
+    pointer-events: none;
+    animation: slimeBubble2 14s ease-in-out infinite;
+    filter: blur(25px);
+  }
+
+  /* Spooky button animations */
+  @keyframes spookyRipple {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(20);
+      opacity: 0;
+    }
+  }
+
+  @keyframes drip {
+    0% {
+      transform: translateY(0);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translateY(4px);
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(8px);
+      opacity: 0.2;
+    }
   }
 }
