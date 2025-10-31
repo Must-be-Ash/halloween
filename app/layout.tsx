@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Nano Banana Cam x402',
     description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.05 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
-    url: 'https://x402-thumbnails.vercel.app',
+    url: 'https://x402-halloween.vercel.app',
     siteName: 'Nano Banana Cam x402',
     images: [
       {
