@@ -1,6 +1,6 @@
 # Nano Banana Cam x402
 
-AI-powered camera app with **cryptocurrency micropayments** using the x402 protocol. Capture photos and transform them with 21 unique AI filters for just $0.05 USDC per transformation.
+AI-powered camera app with **cryptocurrency micropayments** using the x402 protocol. Capture photos and transform them with AI filters for just $0.01 USDC using x402.
 
 [![Hosted on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://x402-halloween.vercel.app/)
 [![x402 Protocol](https://img.shields.io/badge/Powered%20by-x402-blue?style=for-the-badge)](https://www.x402.org/)
@@ -9,7 +9,7 @@ AI-powered camera app with **cryptocurrency micropayments** using the x402 proto
 
 ## 🎯 Overview
 
-This app demonstrates **HTTP 402 Payment Required** in action - a modern micropayment standard that brings cryptocurrency payments to web APIs. Users pay $0.05 in USDC on Base network for each AI image transformation, with payments happening automatically and transparently.
+This app demonstrates **HTTP 402 Payment Required** in action - a modern micropayment standard that brings cryptocurrency payments to web APIs. Users pay $0.01 in USDC on Base network for each AI image transformation, with payments happening automatically and transparently.
 
 ### What is x402?
 
@@ -39,7 +39,7 @@ When a user captures a photo and applies a filter:
 
 1. **Wallet Connection**: User connects crypto wallet (via RainbowKit)
 2. **Capture & Filter**: User takes photo and selects AI filter
-3. **Payment Authorization**: Client automatically signs EIP-3009 payment authorization ($0.05 USDC)
+3. **Payment Authorization**: Client automatically signs EIP-3009 payment authorization ($0.01 USDC)
 4. **Verification**: Server verifies signature and checks USDC balance
 5. **Settlement**: Server executes on-chain USDC transfer (payment collected)
 6. **AI Processing**: Image sent to fal.ai Nano Banana API for transformation
@@ -50,7 +50,7 @@ When a user captures a photo and applies a filter:
 **Transaction Details:**
 - **Network**: Base (Ethereum L2)
 - **Token**: USDC (Circle's USD stablecoin)
-- **Amount**: $0.05 per transformation
+- **Amount**: $0.01 per transformation
 - **Facilitator**: Coinbase Developer Platform (CDP)
 - **Your Revenue**: 100% (you keep all payments)
 
@@ -77,7 +77,7 @@ All credit for the core camera app, UI/UX design, and filter concepts goes to Es
 - ...and more
 
 ### x402 Micropayments
-- $0.05 USDC per AI transformation
+- $0.01 USDC per AI transformation
 - Automatic payment handling (no manual approvals per payment)
 - Instant settlement to your wallet
 - Base network (low fees)

@@ -13,7 +13,7 @@ const creepster = Creepster({
 
 export const metadata: Metadata = {
   title: 'Nano Banana Cam x402',
-  description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.05 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
+  description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.01 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
   openGraph: {
     title: 'Nano Banana Cam x402',
-    description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.05 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
+    description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.01 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
     url: 'https://x402-halloween.vercel.app',
     siteName: 'Nano Banana Cam x402',
     images: [
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Nano Banana Cam x402',
-    description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.05 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
+    description: 'Demo showcasing x402 HTTP micropayments for AI services. Pay $0.01 in USDC per image transformation using cryptocurrency - no subscriptions, instant settlement on Base network.',
     images: ['/og.png'],
   },
 }
