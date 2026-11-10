@@ -74,41 +74,31 @@ With x402, they can:
 The Halloween app's backend is ~300 lines of code. Here's the payment-critical part:
 
 ```typescript
-// 1. User makes request without payment
-if (!paymentHeader) {
+// 1. Declare the price once — x402 v2 handles the 402 response, verification and settlement
+const resourceServer = new x402ResourceServer(new HTTPFacilitatorClient(facilitator))
+  .register("eip155:8453", new ExactEvmScheme())
+
+export const POST = withX402(handler, {
+  accepts: {
+    scheme: "exact",
+    price: "$0.01",
+    network: "eip155:8453", // Base mainnet (CAIP-2)
+    payTo: YOUR_WALLET_ADDRESS,
+  },
+  description: "AI image transformation - $0.01",
+}, resourceServer) // no PAYMENT-SIGNATURE → 402; valid payment → verify + settle on-chain (with retry)
+
+async function handler(request: NextRequest) {
+  // 2. Call your AI model (only runs after payment settled)
+  const result = await fal.subscribe("fal-ai/nano-banana/edit", {
+    input: { prompt, image_urls: [imageDataUrl] }
+  })
+
+  // 3. Return transformed image (PAYMENT-RESPONSE receipt header added automatically)
   return NextResponse.json({
-    x402Version: 1,
-    accepts: [{
-      scheme: "exact",
-      network: "base",
-      maxAmountRequired: "10000", // $0.01 in USDC atomic units
-      payTo: YOUR_WALLET_ADDRESS,
-      description: "AI image transformation - $0.01"
-    }]
-  }, { status: 402 })
+    processedImageUrl: result.data.images[0].url
+  })
 }
-
-// 2. Verify payment
-const verification = await verifyPayment(paymentPayload, paymentRequirements)
-if (!verification.isValid) {
-  return NextResponse.json({ error: "Invalid payment" }, { status: 402 })
-}
-
-// 3. Settle payment on-chain (with retry for production reliability)
-const settlement = await settlePayment(paymentPayload, paymentRequirements)
-if (!settlement.success) {
-  return NextResponse.json({ error: "Settlement failed" }, { status: 402 })
-}
-
-// 4. Call your AI model
-const result = await fal.subscribe("fal-ai/nano-banana/edit", {
-  input: { prompt, image_urls: [imageDataUrl] }
-})
-
-// 5. Return transformed image
-return NextResponse.json({
-  processedImageUrl: result.data.images[0].url
-})
 ```
 
 That's it. No payment processing infrastructure. No invoice generation. No subscription management. Just verify, settle, serve.

@@ -2,7 +2,9 @@ import { type NextRequest, NextResponse } from "next/server"
 import { fal } from "@fal-ai/client"
 import { rateLimiter, getClientIP } from "@/lib/rate-limiter"
 import { facilitator } from "@coinbase/x402"
-import { useFacilitator } from "x402/verify"
+import { withX402 } from "@/lib/x402"
+import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server"
+import { ExactEvmScheme } from "@x402/evm/exact/server"
 import { createThumbnailPrompt, createCombinedPrompt } from "@/lib/thumbnail-prompt"
 import { retryWithBackoff, isRetryableError } from "@/lib/retry-utils"
 
@@ -11,12 +13,13 @@ fal.config({
   credentials: process.env.FAL_KEY,
 })
 
-// Initialize CDP facilitator (works in Node.js runtime)
-const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilitator)
+// x402 v2 resource server backed by the CDP facilitator (Node.js runtime)
+const resourceServer = new x402ResourceServer(new HTTPFacilitatorClient(facilitator)).register(
+  "eip155:8453",
+  new ExactEvmScheme(),
+)
 
 const RECIPIENT_ADDRESS = process.env.RECIPIENT_WALLET_ADDRESS! as `0x${string}`
-const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-const PAYMENT_AMOUNT = 0.01
 
 const filterConfigs = {
   acid: {
@@ -109,156 +112,9 @@ const filterConfigs = {
   },
 }
 
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
-    // 1. Check for payment header first
-    const paymentHeader = request.headers.get("X-PAYMENT")
-
-    if (!paymentHeader) {
-      console.log("[x402] No payment header - returning 402")
-      // Return 402 with payment requirements
-      return NextResponse.json({
-        x402Version: 1,
-        error: "X-PAYMENT header is required",
-        accepts: [{
-          scheme: "exact",
-          network: "base",
-          maxAmountRequired: (PAYMENT_AMOUNT * 10 ** 6).toString(),
-          resource: request.url,
-          description: "AI image transformation with Nano Banana - $0.01",
-          mimeType: "application/json",
-          payTo: RECIPIENT_ADDRESS,
-          maxTimeoutSeconds: 60,
-          asset: USDC_BASE,
-          extra: { name: "USD Coin", version: "2" }
-        }]
-      }, { status: 402 })
-    }
-
-    // 2. Decode and verify payment
-    console.log("[x402] Decoding payment header...")
-    let paymentPayload
-    try {
-      const decoded = Buffer.from(paymentHeader, "base64").toString("utf-8")
-      paymentPayload = JSON.parse(decoded)
-      console.log("[x402] Payment payload decoded:", JSON.stringify(paymentPayload, null, 2))
-    } catch (error) {
-      console.error("[x402] Failed to decode payment:", error)
-      return NextResponse.json(
-        { error: "Invalid payment header format" },
-        { status: 400 }
-      )
-    }
-
-    const paymentRequirements = {
-      scheme: "exact" as const,
-      network: "base" as const,
-      maxAmountRequired: (PAYMENT_AMOUNT * 10 ** 6).toString(),
-      resource: request.url,
-      description: "AI image transformation with Nano Banana - $0.01",
-      mimeType: "application/json",
-      payTo: RECIPIENT_ADDRESS,
-      maxTimeoutSeconds: 60,
-      asset: USDC_BASE,
-      extra: { name: "USD Coin", version: "2" }
-    }
-
-    console.log("[x402] Verifying payment with CDP facilitator...")
-    console.log("[x402] Payment requirements:", JSON.stringify(paymentRequirements, null, 2))
-
-    try {
-      const verifyResult = await verifyPayment(paymentPayload, paymentRequirements)
-      console.log("[x402] Verification result:", JSON.stringify(verifyResult, null, 2))
-
-      if (!verifyResult.isValid) {
-        console.error("[x402] Payment verification failed:", verifyResult.invalidReason)
-        return NextResponse.json(
-          { error: "Payment verification failed", reason: verifyResult.invalidReason },
-          { status: 402 }
-        )
-      }
-
-      console.log("[x402] Payment verified successfully for payer:", verifyResult.payer)
-    } catch (error) {
-      console.error("[x402] Verification error:", error)
-      return NextResponse.json(
-        { error: "Payment verification failed", details: error instanceof Error ? error.message : String(error) },
-        { status: 500 }
-      )
-    }
-
-    // 3. Settle payment BEFORE processing image (collect money first!)
-    console.log("[x402] Settling payment...")
-    let settlementResult
-    try {
-      // Retry settlement with exponential backoff (handles transient 502 errors)
-      settlementResult = await retryWithBackoff(
-        async () => {
-          console.log("[x402] Attempting payment settlement...")
-          const result = await settlePayment(paymentPayload, paymentRequirements)
-
-          // Check if settlement was successful
-          if (!result.success) {
-            // Create an error object for retry logic
-            const error = new Error(result.errorReason || "Settlement failed") as any
-            error.settlementResult = result
-
-            // Check if this error is retryable
-            if (isRetryableError(error)) {
-              console.warn("[x402] ⚠️  Retryable settlement error:", result.errorReason)
-              throw error
-            } else {
-              // Non-retryable error, return the result
-              console.error("[x402] ❌ Non-retryable settlement error:", result.errorReason)
-            }
-          }
-
-          return result
-        },
-        {
-          maxRetries: 3,
-          initialDelayMs: 1000,
-          maxDelayMs: 5000,
-          backoffMultiplier: 2,
-          onRetry: (error, attempt, nextDelayMs) => {
-            console.log(`[x402] 🔄 Settlement attempt ${attempt} failed: ${error.message}`)
-            console.log(`[x402] ⏱️  Retrying in ${nextDelayMs}ms...`)
-          }
-        }
-      )
-
-      console.log("[x402] Settlement result:", JSON.stringify(settlementResult, null, 2))
-
-      if (!settlementResult.success) {
-        console.error("[x402] ❌ Settlement failed after all retries:", settlementResult.errorReason)
-        return NextResponse.json(
-          { error: "Payment settlement failed", reason: settlementResult.errorReason },
-          { status: 402 }
-        )
-      }
-
-      console.log("[x402] ✅ Payment settled successfully!")
-      console.log("[x402] Transaction:", settlementResult.transaction)
-      console.log("[x402] Network:", settlementResult.network)
-      console.log("[x402] Payer:", settlementResult.payer)
-    } catch (error) {
-      console.error("[x402] Settlement error after all retries:", error)
-
-      // Extract more detailed error information
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      const errorDetails = (error as any)?.settlementResult?.errorReason || errorMessage
-
-      return NextResponse.json(
-        {
-          error: "Payment settlement failed",
-          details: errorDetails,
-          message: "The payment system is experiencing issues. Please try again in a few moments."
-        },
-        { status: 402 }
-      )
-    }
-
-    // 4. Continue with rate limiting and image processing
+    // Payment is verified and settled by withX402 (lib/x402.ts) before this runs
     const clientIP = getClientIP(request)
     const rateLimitResult = await rateLimiter.isAllowed(clientIP)
 
@@ -336,17 +192,11 @@ export async function POST(request: NextRequest) {
 
     console.log("[x402-halloween] Returning processed image without watermark")
 
-    // 5. Add payment receipt to response headers (payment already settled before processing)
+    // withX402 attaches the PAYMENT-RESPONSE receipt header after settlement
     const headers: Record<string, string> = {
       "X-RateLimit-Limit": "100",
       "X-RateLimit-Remaining": rateLimitResult.remaining?.toString() || "0",
       "X-RateLimit-Reset": new Date(rateLimitResult.resetTime || 0).toISOString(),
-      "X-PAYMENT-RESPONSE": Buffer.from(JSON.stringify({
-        success: true,
-        transaction: settlementResult.transaction,
-        network: settlementResult.network,
-        payer: settlementResult.payer
-      })).toString("base64")
     }
 
     return NextResponse.json(
@@ -366,3 +216,49 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const POST = withX402(
+  handler,
+  {
+    accepts: {
+      scheme: "exact",
+      price: "$0.01",
+      network: "eip155:8453",
+      payTo: RECIPIENT_ADDRESS,
+      maxTimeoutSeconds: 60,
+    },
+    description: "AI image transformation with Nano Banana - $0.01",
+    mimeType: "application/json",
+  },
+  resourceServer,
+  {
+    // Retry settlement with exponential backoff (handles transient facilitator 502s)
+    retrySettlement: (settle) =>
+      retryWithBackoff(
+        async () => {
+          console.log("[x402] Attempting payment settlement...")
+          const result: any = await settle()
+          if (!result.success) {
+            const error = new Error(result.errorReason || "Settlement failed") as any
+            error.settlementResult = result
+            if (isRetryableError(error)) {
+              console.warn("[x402] ⚠️  Retryable settlement error:", result.errorReason)
+              throw error
+            }
+            console.error("[x402] ❌ Non-retryable settlement error:", result.errorReason)
+          }
+          return result
+        },
+        {
+          maxRetries: 3,
+          initialDelayMs: 1000,
+          maxDelayMs: 5000,
+          backoffMultiplier: 2,
+          onRetry: (error, attempt, nextDelayMs) => {
+            console.log(`[x402] 🔄 Settlement attempt ${attempt} failed: ${error.message}`)
+            console.log(`[x402] ⏱️  Retrying in ${nextDelayMs}ms...`)
+          },
+        },
+      ).catch((error) => error.settlementResult ?? Promise.reject(error)),
+  },
+)
