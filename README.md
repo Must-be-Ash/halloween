@@ -1,5 +1,7 @@
 # Nano Banana Cam x402
 
+> **Outdated, not maintained.** Next.js and CDP packages are out of date and need to be updated before use.
+
 AI-powered camera app with **cryptocurrency micropayments** using the x402 protocol. Capture photos and transform them with AI filters for just $0.01 USDC using x402.
 
 [![Hosted on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://x402-halloween.vercel.app/)
